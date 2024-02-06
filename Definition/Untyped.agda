@@ -48,7 +48,7 @@ infix 25 _[_]↑²
 -- in the list).
 
 data Kind : (ns : List Nat) → Set a where
-  Ukind : Kind []
+  Ukind : Nat → Kind []
 
   Binderkind : (b : BinderMode) (p q : M) → Kind (0 ∷ 1 ∷ [])
 
@@ -102,7 +102,7 @@ private
 -- Π, lam, and natrec are binders.
 
 -- Type constructors.
-pattern U = gen Ukind []
+pattern U n = gen (Ukind n) []
 pattern ℕ = gen Natkind []
 pattern Empty = gen Emptykind []
 pattern Unit! = gen (Unitkind _) []
@@ -221,7 +221,7 @@ data Neutral : Term n → Set a where
 data Whnf {n : Nat} : Term n → Set a where
 
   -- Type constructors are whnfs.
-  Uₙ     : Whnf U
+  Uₙ     : Whnf (U ℓ)
   ΠΣₙ    : Whnf (ΠΣ⟨ b ⟩ p , q ▷ A ▹ B)
   ℕₙ     : Whnf ℕ
   Unitₙ  : Whnf (Unit s)
@@ -245,7 +245,7 @@ data Whnf {n : Nat} : Term n → Set a where
 -- Different whnfs are trivially distinguished by propositional equality.
 -- (The following statements are sometimes called "no-confusion theorems".)
 
-U≢ne : Neutral A → U PE.≢ A
+U≢ne : Neutral A → (U ℓ) PE.≢ A
 U≢ne () PE.refl
 
 ℕ≢ne : Neutral A → ℕ PE.≢ A
@@ -268,11 +268,11 @@ B≢ne (BΣ m p q) () PE.refl
 Id≢ne : Neutral B → Id A t u PE.≢ B
 Id≢ne () PE.refl
 
-U≢B : ∀ W → U PE.≢ ⟦ W ⟧ F ▹ G
+U≢B : ∀ W → (U ℓ) PE.≢ ⟦ W ⟧ F ▹ G
 U≢B (BΠ p q) ()
 U≢B (BΣ m p q) ()
 
-U≢ΠΣ : ∀ b → U PE.≢ ΠΣ⟨ b ⟩ p , q ▷ F ▹ G
+U≢ΠΣ : ∀ b → (U ℓ) PE.≢ ΠΣ⟨ b ⟩ p , q ▷ F ▹ G
 U≢ΠΣ BMΠ ()
 U≢ΠΣ (BMΣ s) ()
 
@@ -439,7 +439,7 @@ data Numeral {n : Nat} : Term n → Set a where
 -- neutral.
 
 data No-η-equality {n : Nat} : Term n → Set a where
-  Uₙ     : No-η-equality U
+  Uₙ     : No-η-equality (U ℓ)
   Σʷₙ    : No-η-equality (Σʷ p , q ▷ A ▹ B)
   Emptyₙ : No-η-equality Empty
   ℕₙ     : No-η-equality ℕ
