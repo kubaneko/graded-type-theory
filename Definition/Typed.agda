@@ -28,10 +28,10 @@ infixl 24 _∙_
 
 private
   variable
-    n : Nat
+    n l : Nat
     Γ : Con Term _
     A A₁ A₂ A′ B B₁ B₂ C E F F′ G H : Term _
-    a f g m n′ s s′ t t₁ t₂ t′ u u₁ u₂ u′ v v₁ v₂ v′ w w₁ w₂ w′ z z′ :
+    a f g n′ s s′ t t₁ t₂ t′ u u₁ u₂ u′ v v₁ v₂ v′ w w₁ w₂ w′ z z′ :
       Term _
     σ σ′ : Subst _ _
     x : Fin _
@@ -50,24 +50,24 @@ mutual
   data ⊢_ : Con Term n → Set ℓ where
     ε   : ⊢ ε
     _∙_ : ⊢ Γ
-        → Γ ⊢ A
+        → Γ ⊢ A 𝕌 _
         → ⊢ Γ ∙ A
 
   -- Well-formed type
-  data _⊢_ (Γ : Con Term n) : Term n → Set ℓ where
-    Uⱼ     : ⊢ Γ → Γ ⊢ U
-    ℕⱼ     : ⊢ Γ → Γ ⊢ ℕ
-    Emptyⱼ : ⊢ Γ → Γ ⊢ Empty
-    Unitⱼ  : ⊢ Γ → Unit-allowed k → Γ ⊢ Unit k
-    ΠΣⱼ    : Γ     ⊢ F
-           → Γ ∙ F ⊢ G
+  data _⊢_𝕌_ (Γ : Con Term n) : Term n → Set ℓ where
+    Uⱼ     : ⊢ Γ → Γ ⊢ U 𝕌 l
+    ℕⱼ     : ⊢ Γ → Γ ⊢ ℕ 𝕌 0
+    Emptyⱼ : ⊢ Γ → Γ ⊢ Empty 𝕌 0
+    Unitⱼ  : ⊢ Γ → Unit-allowed k → Γ ⊢ Unit k 𝕌 0
+    ΠΣⱼ    : Γ     ⊢ F 𝕌 k
+           → Γ ∙ F ⊢ G 𝕌 l
            → ΠΣ-allowed b p q
-           → Γ     ⊢ ΠΣ⟨ b ⟩ p , q ▷ F ▹ G
-    Idⱼ    : Γ ⊢ t ∷ A
+           → Γ     ⊢ ΠΣ⟨ b ⟩ p , q ▷ F ▹ G 𝕌 k ⊔ l
+    Idⱼ    : Γ ⊢ t ∷ A -- TODO how to get level of A from this?
            → Γ ⊢ u ∷ A
            → Γ ⊢ Id A t u
-    univ   : Γ ⊢ A ∷ U
-           → Γ ⊢ A
+    univ   : Γ ⊢ A ∷ (U p)
+           → Γ ⊢ A 𝕌 p
 
   -- Well-formed term of a type
   data _⊢_∷_ (Γ : Con Term n) : Term n → Term n → Set ℓ where
