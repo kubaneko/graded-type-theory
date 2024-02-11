@@ -7,10 +7,12 @@ module Definition.Untyped.Inversion {a} (M : Set a) where
 open import Definition.Untyped M
 
 open import Tools.Fin
+open import Tools.Nat
 open import Tools.Product
 open import Tools.PropositionalEquality
 
 private variable
+  l              : Nat
   x              : Fin _
   ρ              : Wk _ _
   A B t t′ u v w : Term _
@@ -27,8 +29,8 @@ wk-var {t = var _} refl = _ , refl , refl
 
 -- Inversion for U.
 
-wk-U : wk ρ t ≡ U → t ≡ U
-wk-U {t = U} refl = refl
+wk-U : wk ρ t ≡ U l → t ≡ U l
+wk-U {t = U l} refl = refl
 
 -- Inversion for ΠΣ⟨_⟩_,_▷_▹_.
 

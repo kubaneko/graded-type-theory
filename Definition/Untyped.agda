@@ -19,7 +19,7 @@ open import Definition.Untyped.NotParametrised public
 private
   variable
     p p′ p₁ p₂ q q₁ q₂ r : M
-    n m ℓ : Nat
+    n m l : Nat
     b : BinderMode
     s : Strength
     bs bs′ : List _
@@ -221,7 +221,7 @@ data Neutral : Term n → Set a where
 data Whnf {n : Nat} : Term n → Set a where
 
   -- Type constructors are whnfs.
-  Uₙ     : Whnf (U ℓ)
+  Uₙ     : Whnf (U l)
   ΠΣₙ    : Whnf (ΠΣ⟨ b ⟩ p , q ▷ A ▹ B)
   ℕₙ     : Whnf ℕ
   Unitₙ  : Whnf (Unit s)
@@ -245,7 +245,7 @@ data Whnf {n : Nat} : Term n → Set a where
 -- Different whnfs are trivially distinguished by propositional equality.
 -- (The following statements are sometimes called "no-confusion theorems".)
 
-U≢ne : Neutral A → (U ℓ) PE.≢ A
+U≢ne : Neutral A → (U l) PE.≢ A
 U≢ne () PE.refl
 
 ℕ≢ne : Neutral A → ℕ PE.≢ A
@@ -268,11 +268,14 @@ B≢ne (BΣ m p q) () PE.refl
 Id≢ne : Neutral B → Id A t u PE.≢ B
 Id≢ne () PE.refl
 
-U≢B : ∀ W → (U ℓ) PE.≢ ⟦ W ⟧ F ▹ G
+U≢Usuc : (U l) PE.≢ (U (Nat.suc l))
+U≢Usuc ()
+
+U≢B : ∀ W → (U l) PE.≢ ⟦ W ⟧ F ▹ G
 U≢B (BΠ p q) ()
 U≢B (BΣ m p q) ()
 
-U≢ΠΣ : ∀ b → (U ℓ) PE.≢ ΠΣ⟨ b ⟩ p , q ▷ F ▹ G
+U≢ΠΣ : ∀ b → (U l) PE.≢ ΠΣ⟨ b ⟩ p , q ▷ F ▹ G
 U≢ΠΣ BMΠ ()
 U≢ΠΣ (BMΣ s) ()
 
@@ -439,7 +442,7 @@ data Numeral {n : Nat} : Term n → Set a where
 -- neutral.
 
 data No-η-equality {n : Nat} : Term n → Set a where
-  Uₙ     : No-η-equality (U ℓ)
+  Uₙ     : No-η-equality (U l)
   Σʷₙ    : No-η-equality (Σʷ p , q ▷ A ▹ B)
   Emptyₙ : No-η-equality Empty
   ℕₙ     : No-η-equality ℕ
@@ -663,19 +666,19 @@ sgSubst = consSubst idSubst
 --
 -- If Γ ⊢ σ : Δ and Δ ⊢ σ′ : Φ then Γ ⊢ σ ₛ•ₛ σ′ : Φ.
 
-_ₛ•ₛ_ : Subst ℓ m → Subst m n → Subst ℓ n
+_ₛ•ₛ_ : Subst l m → Subst m n → Subst l n
 _ₛ•ₛ_ σ σ′ x = σ′ x [ σ ]
 
 -- Composition of weakening and substitution.
 --
 --  If ρ : Γ ≤ Δ and Δ ⊢ σ : Φ then Γ ⊢ ρ •ₛ σ : Φ.
 
-_•ₛ_ : Wk ℓ m → Subst m n → Subst ℓ n
+_•ₛ_ : Wk l m → Subst m n → Subst l n
 _•ₛ_ ρ σ x = wk ρ (σ x)
 
 --  If Γ ⊢ σ : Δ and ρ : Δ ≤ Φ then Γ ⊢ σ ₛ• ρ : Φ.
 
-_ₛ•_ : Subst ℓ m → Wk m n → Subst ℓ n
+_ₛ•_ : Subst l m → Wk m n → Subst l n
 _ₛ•_ σ ρ x = σ (wkVar ρ x)
 
 -- Substitute the first variable of a term with an other term.

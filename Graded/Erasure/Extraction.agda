@@ -18,7 +18,7 @@ open import Graded.Erasure.Target as T
 
 private
   variable
-    m n : Nat
+    m n l : Nat
     Γ : Con U.Term n
     A t t′ u : U.Term n
     v v′ w : T.Term n
@@ -36,7 +36,7 @@ erase-prodrecω p t u = case is-𝟘? p of λ where
 
 erase : U.Term n → T.Term n
 erase (var x) = T.var x
-erase U = ↯
+erase (U l) = ↯
 erase (ΠΣ⟨ _ ⟩ _ , _ ▷ _ ▹ _) = ↯
 erase (U.lam p t) = T.lam (erase t)
 erase (t ∘⟨ p ⟩ u) = case is-𝟘? p of λ where

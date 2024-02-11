@@ -47,7 +47,7 @@ import Tools.Reasoning.PropositionalEquality
 
 private
   variable
-    n : Nat
+    n l : Nat
     Γ : Con Term n
     A B F t u v w : Term n
     G : Term (1+ n)
@@ -445,7 +445,7 @@ Usage-restrictions-satisfied = λ where
                             Usage-restrictions-satisfied u ×
                             Usage-restrictions-satisfied v
   (var _)                 → Lift _ ⊤
-  U                       → Lift _ ⊤
+  (U l)                   → Lift _ ⊤
   ℕ                       → Lift _ ⊤
   Empty                   → Lift _ ⊤
   Unit!                   → Lift _ ⊤
@@ -767,7 +767,7 @@ Usage-restrictions-satisfied→▸[𝟘ᵐ] {ok = 𝟘ᵐ-ok} = lemma _
       sub var $ begin
         𝟘ᶜ          ≡˘⟨ 𝟘ᶜ,≔𝟘 ⟩
         𝟘ᶜ , x ≔ 𝟘  ∎
-    U _ →
+    (U l) _ →
       Uₘ
     ℕ _ →
       ℕₘ
@@ -1035,7 +1035,7 @@ opaque
           (≈ᶜ-trivial 𝟙≡𝟘)
       (var x) _ →
         sub var (≈ᶜ-trivial 𝟙≡𝟘)
-      U _ →
+      (U l) _ →
         sub Uₘ (≈ᶜ-trivial 𝟙≡𝟘)
       ℕ _ →
         sub ℕₘ (≈ᶜ-trivial 𝟙≡𝟘)
@@ -1741,7 +1741,7 @@ opaque
   𝟘ᶜ          ∎
   where
   open Tools.Reasoning.Equivalence Conₘ-setoid
-⌈⌉-𝟘ᵐ U =
+⌈⌉-𝟘ᵐ (U l) =
   ≈ᶜ-refl
 ⌈⌉-𝟘ᵐ {ok = ok} (ΠΣ⟨ _ ⟩ _ , _ ▷ F ▹ G) = begin
   (⌈ F ⌉ 𝟘ᵐ[ ok ] +ᶜ tailₘ (⌈ G ⌉ 𝟘ᵐ[ ok ]))  ≈⟨ +ᶜ-cong (⌈⌉-𝟘ᵐ F) (tailₘ-cong (⌈⌉-𝟘ᵐ G)) ⟩
@@ -2123,12 +2123,12 @@ module _ (TR : Type-restrictions) where
       (ε ∙ 𝟘≤𝟙 ∙ 𝟙≤𝟘) →
     ≤-antisym 𝟙≤𝟘 𝟘≤𝟙 }
     where
-    Γ′ = ε ∙ U ∙ var x0
+    Γ′ = ε ∙ (U l) ∙ var x0
     t′ = var x0
     A′ = var x1
     γ′ = ε ∙ 𝟘 ∙ 𝟙
 
-    ⊢U : ⊢ ε ∙ U
+    ⊢U : ⊢ ε ∙ (U l)
     ⊢U = ε ∙ Uⱼ ε
 
     ⊢Γ : ⊢ Γ′

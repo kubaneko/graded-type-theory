@@ -26,10 +26,11 @@ open import Tools.Function
 open import Tools.Nat
 open import Tools.Product
 import Tools.PropositionalEquality as PE
+open import Tools.Relation
 
 private
   variable
-    n : Nat
+    n l l₁ l₂ : Nat
     Γ : Con Term n
     A A′ B B′ C D E F U′ : Term n
     a b t u u′ v : Term n
@@ -363,17 +364,18 @@ idRedTerm:*: t = [ t , t , id t ]
 
 -- U cannot be a term
 
-UnotInA : Γ ⊢ U ∷ A → ⊥
-UnotInA (conv U∷U x) = UnotInA U∷U
+UnotInA : ¬(Γ ⊢ A ≡ U (Nat.suc l)) → Γ ⊢ U l ∷ A → ⊥
+UnotInA nuniv (conv U∷U x) = UnotInA (λ x₁ → nuniv (trans (sym x) x₁))  U∷U
+UnotInA nuniv (Uⱼ k) = nuniv (refl (Uⱼ k))
 
-UnotInA[t] : t [ a ]₀ PE.≡ U
+UnotInA[t] : t [ a ]₀ PE.≡ U l
          → Γ ⊢ a ∷ A
          → Γ ∙ A ⊢ t ∷ B
          → ⊥
 UnotInA[t] () x₁ (ℕⱼ x₂)
 UnotInA[t] () x₁ (Emptyⱼ x₂)
 UnotInA[t] () _  (ΠΣⱼ _ _ _)
-UnotInA[t] x₁ x₂ (var x₃ here) rewrite x₁ = UnotInA x₂
+UnotInA[t] x₁ x₂ (var x₃ here) rewrite x₁ = {!!}
 UnotInA[t] () x₂ (var x₃ (there x₄))
 UnotInA[t] () _  (lamⱼ _ _ _)
 UnotInA[t] () x₁ (x₂ ∘ⱼ x₃)
@@ -381,100 +383,102 @@ UnotInA[t] () x₁ (zeroⱼ x₂)
 UnotInA[t] () x₁ (sucⱼ x₂)
 UnotInA[t] () x₁ (natrecⱼ x₂ x₃ x₄ x₅)
 UnotInA[t] () x₁ (emptyrecⱼ x₂ x₃)
+UnotInA[t] PE.refl x₁ (Uⱼ x₂) = {!!}
 UnotInA[t] x x₁ (conv x₂ x₃) = UnotInA[t] x x₁ x₂
 
-UnotInA[t,u] : t [ consSubst (consSubst idSubst u) u′ ] PE.≡ U
+UnotInA[t,u] : t [ consSubst (consSubst idSubst u) u′ ] PE.≡ U l
               → Γ ⊢ u ∷ A
               → Γ ⊢ u′ ∷ B [ a ]₀
               → Γ ∙ A ∙ B ⊢ t ∷ C
               → ⊥
-UnotInA[t,u] PE.refl u u′ (var x here) = UnotInA u′
-UnotInA[t,u] PE.refl u u′ (var x (there here)) = UnotInA u
+UnotInA[t,u] PE.refl u u′ (var x here) = UnotInA (λ x₁ → (λ x → {! U≢Usuc!}) (trans u′ x₁)) u′
+UnotInA[t,u] PE.refl u u′ (var x (there here)) = UnotInA {!!} u
 UnotInA[t,u] eq u u′ (conv t x) = UnotInA[t,u] eq u u′ t
+UnotInA[t,u] eq u u′ (Uⱼ l) = {!!}
 
-redU*Term′ : U′ PE.≡ U → Γ ⊢ A ⇒ U′ ∷ B → ⊥
-redU*Term′ U′≡U (conv A⇒U x) = redU*Term′ U′≡U A⇒U
-redU*Term′ () (app-subst A⇒U x)
-redU*Term′ U′≡U (β-red _ _ ⊢t ⊢u _ _) = UnotInA[t] U′≡U ⊢u ⊢t
-redU*Term′ () (natrec-subst x x₁ x₂ A⇒U)
-redU*Term′ PE.refl (natrec-zero x x₁ x₂) = UnotInA x₁
-redU*Term′ U′≡U (natrec-suc x x₁ x₂ x₃) =
-  UnotInA[t,u] U′≡U x₃ (natrecⱼ x x₁ x₂ x₃) x₂
-redU*Term′ U′≡U (prodrec-β _ _ _ ⊢t ⊢u ⊢v _ _) =
-  UnotInA[t,u] U′≡U ⊢t ⊢u ⊢v
-redU*Term′ () (emptyrec-subst x A⇒U)
-redU*Term′ PE.refl (Σ-β₁ _ _ x _ _ _) = UnotInA x
-redU*Term′ PE.refl (Σ-β₂ _ _ _ x _ _) = UnotInA x
-redU*Term′ PE.refl (J-β _ _ _ _ _ _ ⊢u) = UnotInA ⊢u
-redU*Term′ PE.refl (K-β _ _ ⊢u _) = UnotInA ⊢u
-redU*Term′ PE.refl (unitrec-β _ x _) = UnotInA x
-
-redU*Term : Γ ⊢ A ⇒* U ∷ B → ⊥
-redU*Term (id x) = UnotInA x
-redU*Term (x ⇨ A⇒*U) = redU*Term A⇒*U
-
--- Nothing reduces to U
-
-redU : Γ ⊢ A ⇒ U → ⊥
-redU (univ x) = redU*Term′ PE.refl x
-
-redU* : Γ ⊢ A ⇒* U → A PE.≡ U
-redU* (id x) = PE.refl
-redU* (x ⇨ A⇒*U) rewrite redU* A⇒*U = ⊥-elim (redU x)
-
-det∈ : ∀ {x} → x ∷ A ∈ Γ → x ∷ B ∈ Γ → A PE.≡ B
-det∈ here here = PE.refl
-det∈ (there x) (there y) = PE.cong wk1 (det∈ x y)
-
-------------------------------------------------------------------------
--- Some derived typing rules
-
-opaque
-
-  -- A typing rule for variable 0.
-
-  var₀ : Γ ⊢ A → Γ ∙ A ⊢ var x0 ∷ wk1 A
-  var₀ ⊢A = var (wf ⊢A ∙ ⊢A) here
-
-opaque
-
-  -- A typing rule for variable 1.
-
-  var₁ : Γ ∙ A ⊢ B → Γ ∙ A ∙ B ⊢ var x1 ∷ wk1 (wk1 A)
-  var₁ ⊢B = var (wf ⊢B ∙ ⊢B) (there here)
-
-opaque
-
-  -- A typing rule for variable 2.
-
-  var₂ : Γ ∙ A ∙ B ⊢ C → Γ ∙ A ∙ B ∙ C ⊢ var x2 ∷ wk1 (wk1 (wk1 A))
-  var₂ ⊢C = var (wf ⊢C ∙ ⊢C) (there (there here))
-
-opaque
-
-  -- A typing rule for variable 3.
-
-  var₃ :
-    Γ ∙ A ∙ B ∙ C ⊢ D →
-    Γ ∙ A ∙ B ∙ C ∙ D ⊢ var x3 ∷ wk1 (wk1 (wk1 (wk1 A)))
-  var₃ ⊢D = var (wf ⊢D ∙ ⊢D) (there (there (there here)))
-
-opaque
-
-  -- A typing rule for variable 4.
-
-  var₄ :
-    Γ ∙ A ∙ B ∙ C ∙ D ⊢ E →
-    Γ ∙ A ∙ B ∙ C ∙ D ∙ E ⊢ var x4 ∷ wk1 (wk1 (wk1 (wk1 (wk1 A))))
-  var₄ ⊢E = var (wf ⊢E ∙ ⊢E) (there (there (there (there here))))
-
-opaque
-
-  -- A typing rule for variable 5.
-
-  var₅ :
-    Γ ∙ A ∙ B ∙ C ∙ D ∙ E ⊢ F →
-    Γ ∙ A ∙ B ∙ C ∙ D ∙ E ∙ F ⊢ var x5 ∷
-      wk1 (wk1 (wk1 (wk1 (wk1 (wk1 A)))))
-  var₅ ⊢F =
-    var (wf ⊢F ∙ ⊢F) (there (there (there (there (there here)))))
+-- redU*Term′ : U′ PE.≡ U l → Γ ⊢ A ⇒ U′ ∷ B → ⊥
+-- redU*Term′ U′≡U (conv A⇒U x) = redU*Term′ U′≡U A⇒U
+-- redU*Term′ () (app-subst A⇒U x)
+-- redU*Term′ U′≡U (β-red _ _ ⊢t ⊢u _ _) = UnotInA[t] U′≡U ⊢u ⊢t
+-- redU*Term′ () (natrec-subst x x₁ x₂ A⇒U)
+-- redU*Term′ PE.refl (natrec-zero x x₁ x₂) = UnotInA x₁
+-- redU*Term′ U′≡U (natrec-suc x x₁ x₂ x₃) =
+--   UnotInA[t,u] U′≡U x₃ (natrecⱼ x x₁ x₂ x₃) x₂
+-- redU*Term′ U′≡U (prodrec-β _ _ _ ⊢t ⊢u ⊢v _ _) =
+--   UnotInA[t,u] U′≡U ⊢t ⊢u ⊢v
+-- redU*Term′ () (emptyrec-subst x A⇒U)
+-- redU*Term′ PE.refl (Σ-β₁ _ _ x _ _ _) = UnotInA x
+-- redU*Term′ PE.refl (Σ-β₂ _ _ _ x _ _) = UnotInA x
+-- redU*Term′ PE.refl (J-β _ _ _ _ _ _ ⊢u) = UnotInA ⊢u
+-- redU*Term′ PE.refl (K-β _ _ ⊢u _) = UnotInA ⊢u
+-- redU*Term′ PE.refl (unitrec-β _ x _) = UnotInA x
+--
+-- redU*Term : Γ ⊢ A ⇒* U l ∷ B → ⊥
+-- redU*Term (id x) = UnotInA x
+-- redU*Term (x ⇨ A⇒*U) = redU*Term A⇒*U
+--
+-- -- Nothing reduces to U
+--
+-- redU : Γ ⊢ A ⇒ U l → ⊥
+-- redU (univ x) = redU*Term′ PE.refl x
+--
+-- redU* : Γ ⊢ A ⇒* U l → A PE.≡ U l
+-- redU* (id x) = PE.refl
+-- redU* (x ⇨ A⇒*U) rewrite redU* A⇒*U = ⊥-elim (redU x)
+--
+-- det∈ : ∀ {x} → x ∷ A ∈ Γ → x ∷ B ∈ Γ → A PE.≡ B
+-- det∈ here here = PE.refl
+-- det∈ (there x) (there y) = PE.cong wk1 (det∈ x y)
+--
+-- ------------------------------------------------------------------------
+-- -- Some derived typing rules
+--
+-- opaque
+--
+--   -- A typing rule for variable 0.
+--
+--   var₀ : Γ ⊢ A → Γ ∙ A ⊢ var x0 ∷ wk1 A
+--   var₀ ⊢A = var (wf ⊢A ∙ ⊢A) here
+--
+-- opaque
+--
+--   -- A typing rule for variable 1.
+--
+--   var₁ : Γ ∙ A ⊢ B → Γ ∙ A ∙ B ⊢ var x1 ∷ wk1 (wk1 A)
+--   var₁ ⊢B = var (wf ⊢B ∙ ⊢B) (there here)
+--
+-- opaque
+--
+--   -- A typing rule for variable 2.
+--
+--   var₂ : Γ ∙ A ∙ B ⊢ C → Γ ∙ A ∙ B ∙ C ⊢ var x2 ∷ wk1 (wk1 (wk1 A))
+--   var₂ ⊢C = var (wf ⊢C ∙ ⊢C) (there (there here))
+--
+-- opaque
+--
+--   -- A typing rule for variable 3.
+--
+--   var₃ :
+--     Γ ∙ A ∙ B ∙ C ⊢ D →
+--     Γ ∙ A ∙ B ∙ C ∙ D ⊢ var x3 ∷ wk1 (wk1 (wk1 (wk1 A)))
+--   var₃ ⊢D = var (wf ⊢D ∙ ⊢D) (there (there (there here)))
+--
+-- opaque
+--
+--   -- A typing rule for variable 4.
+--
+--   var₄ :
+--     Γ ∙ A ∙ B ∙ C ∙ D ⊢ E →
+--     Γ ∙ A ∙ B ∙ C ∙ D ∙ E ⊢ var x4 ∷ wk1 (wk1 (wk1 (wk1 (wk1 A))))
+--   var₄ ⊢E = var (wf ⊢E ∙ ⊢E) (there (there (there (there here))))
+--
+-- opaque
+--
+--   -- A typing rule for variable 5.
+--
+--   var₅ :
+--     Γ ∙ A ∙ B ∙ C ∙ D ∙ E ⊢ F →
+--     Γ ∙ A ∙ B ∙ C ∙ D ∙ E ∙ F ⊢ var x5 ∷
+--       wk1 (wk1 (wk1 (wk1 (wk1 (wk1 A)))))
+--   var₅ ⊢F =
+--     var (wf ⊢F ∙ ⊢F) (there (there (there (there (there here)))))
