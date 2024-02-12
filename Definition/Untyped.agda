@@ -268,9 +268,6 @@ B≢ne (BΣ m p q) () PE.refl
 Id≢ne : Neutral B → Id A t u PE.≢ B
 Id≢ne () PE.refl
 
-U≢Usuc : (U l) PE.≢ (U (Nat.suc l))
-U≢Usuc ()
-
 U≢B : ∀ W → (U l) PE.≢ ⟦ W ⟧ F ▹ G
 U≢B (BΠ p q) ()
 U≢B (BΣ m p q) ()
