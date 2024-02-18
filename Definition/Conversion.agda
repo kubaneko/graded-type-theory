@@ -200,10 +200,10 @@ mutual
               → Γ ⊢ k [conv↓] l ∷ N
 
     univ      : ∀ {A B}
-              → Γ ⊢ A ∷ U
-              → Γ ⊢ B ∷ U
+              → Γ ⊢ A ∷ U l₁
+              → Γ ⊢ B ∷ U l₁
               → Γ ⊢ A [conv↓] B
-              → Γ ⊢ A [conv↓] B ∷ U
+              → Γ ⊢ A [conv↓] B ∷ U l₁
 
     zero-refl : ⊢ Γ → Γ ⊢ zero [conv↓] zero ∷ ℕ
 
