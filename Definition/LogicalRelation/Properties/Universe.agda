@@ -28,12 +28,16 @@ private
     Γ : Con Term n
 
 -- Helper function for reducible terms of type U for specific type derivations.
-univEq′ : ∀ {l A} ([U] : Γ ⊩⟨ l ⟩U) → Γ ⊩⟨ l ⟩ A ∷ U / U-intr [U] → Γ ⊩⟨ ⁰ ⟩ A
+univEq′ :
+  ∀ {l A} ([U] : Γ ⊩⟨ l ⟩U) → Γ ⊩⟨ l ⟩ A ∷ U l′ / U-intr [U] →
+  ∃ λ l″ → l″ ≤ l′ → Γ ⊩⟨ l″ ⟩ A
 univEq′ (noemb (Uᵣ .⁰ 0<1 ⊢Γ)) (Uₜ A₁ d typeA A≡A [A]) = [A]
 univEq′ (emb 0<1 x) [A] = univEq′ x [A]
 
 -- Reducible terms of type U are reducible types.
-univEq : ∀ {l A} ([U] : Γ ⊩⟨ l ⟩ U) → Γ ⊩⟨ l ⟩ A ∷ U / [U] → Γ ⊩⟨ ⁰ ⟩ A
+univEq :
+  ∀ {l A} ([U] : Γ ⊩⟨ l ⟩ U l′) → Γ ⊩⟨ l ⟩ A ∷ U l′ / [U] →
+  ∃ λ l″ → l″ ≤ l′ → Γ ⊩⟨ l″ ⟩ A
 univEq [U] [A] = univEq′ (U-elim [U])
                          (irrelevanceTerm [U] (U-intr (U-elim [U])) [A])
 

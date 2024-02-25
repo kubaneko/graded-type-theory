@@ -66,7 +66,7 @@ _⊩⟨_⟩Id_ : Con Term n → TypeLevel → Term n → Set a
 
 -- Construct a general reducible type from a specific
 
-U-intr : ∀ {l} → Γ ⊩⟨ l ⟩U → Γ ⊩⟨ l ⟩ U
+U-intr : ∀ {A l} → Γ ⊩⟨ l ⟩U A → Γ ⊩⟨ l ⟩ A
 U-intr (noemb x) = Uᵣ x
 U-intr (emb 0<1 x) = emb 0<1 (U-intr x)
 
@@ -96,8 +96,9 @@ Id-intr (emb 0<1 ⊩A) = emb 0<1 (Id-intr ⊩A)
 
 -- Construct a specific reducible type from a general with some criterion
 
-U-elim : ∀ {l} → Γ ⊩⟨ l ⟩ U → Γ ⊩⟨ l ⟩U
-U-elim (Uᵣ′ l′ l< ⊢Γ) = noemb (Uᵣ l′ l< ⊢Γ)
+U-elim : ∀ {l} → Γ ⊩⟨ l ⟩ U l′ → Γ ⊩⟨ l ⟩U U l′
+U-elim ⊩U@(Uᵣ′ _ _ ⇒*U) with whnfRed* (red ⇒*U) Uₙ
+... | PE.refl = noemb ⊩U
 U-elim (ℕᵣ D) with whnfRed* (red D) Uₙ
 ... | ()
 U-elim (Emptyᵣ D) with whnfRed* (red D) Uₙ

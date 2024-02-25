@@ -303,7 +303,7 @@ record EqRelSet : Set (lsuc ℓ) where
 
 
   -- Composition of universe and generic equality compatibility
-  ~-to-≅ : ∀ {k l} → Γ ⊢ k ~ l ∷ U l₁ → Γ ⊢ k ≅ l
+  ~-to-≅ : ∀ {k l l′} → Γ ⊢ k ~ l ∷ U l′ → Γ ⊢ k ≅ l
   ~-to-≅ k~l = ≅-univ (~-to-≅ₜ k~l)
 
   ≅-W-cong : ∀ {F G H E} W
