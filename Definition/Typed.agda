@@ -75,7 +75,7 @@ mutual
               → Γ ∙ F ⊢ G ∷ U l₂
               → ΠΣ-allowed b p q
               → Γ     ⊢ ΠΣ⟨ b ⟩ p , q ▷ F ▹ G ∷ U (l₁ ⊔ l₂)
-    Uⱼ        : ⊢ Γ → Γ ⊢ U l ∷ U (Nat.suc l)
+    Uⱼ        : ⊢ Γ → Γ ⊢ U l ∷ U (1+ l)
     ℕⱼ        : ⊢ Γ → Γ ⊢ ℕ ∷ U 0
     Emptyⱼ    : ⊢ Γ → Γ ⊢ Empty ∷ U 0
     Unitⱼ     : ⊢ Γ → Unit-allowed k → Γ ⊢ Unit k ∷ U 0

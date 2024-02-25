@@ -1,6 +1,7 @@
 ------------------------------------------------------------------------
 -- The logical relation for reducibility
 ------------------------------------------------------------------------
+{-# OPTIONS --allow-unsolved-metas #-}
 
 open import Definition.Typed.EqualityRelation
 open import Definition.Typed.Restrictions
@@ -24,7 +25,7 @@ open import Definition.Typed.Weakening R
 open import Tools.Empty
 open import Tools.Function
 open import Tools.Level
-open import Tools.Nat using (Nat; 1+)
+open import Tools.Nat using (Nat; 1+; <-rec)
 open import Tools.Product
 import Tools.PropositionalEquality as PE
 open import Tools.Unit
@@ -243,16 +244,62 @@ data _≤_ (l : TypeLevel) : TypeLevel → Set where
   refl : l ≤ l
   emb  : ∀ {l′} → l < l′ → l ≤ l′
 
+-- Reducibility of Neutrals part 2:
+
+-- Neutral type
+record _⊩ne_ {ℓ : Nat} (Γ : Con Term ℓ) (A : Term ℓ) : Set a where
+  constructor ne
+  field
+    l′          : TypeLevel
+    K           : Term ℓ
+    D           : Γ ⊢ A :⇒*: K
+    neK         : Neutral K
+    lower-level : l′ < l
+    K≡K         : Γ ⊢ K ~ K ∷ U l′
+
+-- Neutral type equality
+record _⊩ne_≡_/_ (Γ : Con Term ℓ) (A B : Term ℓ) ([A] : Γ ⊩ne A) : Set a where
+  constructor ne₌
+  open _⊩ne_ [A]
+  field
+    l′          : TypeLevel
+    M           : Term ℓ
+    D′          : Γ ⊢ B :⇒*: M
+    neM         : Neutral M
+    lower-level : l′ < l
+    K≡M         : Γ ⊢ K ~ M ∷ U l′
+
+-- Neutral term
+record _⊩ne_∷_/_ (Γ : Con Term ℓ) (t A : Term ℓ) ([A] : Γ ⊩ne A) : Set a where
+  inductive
+  constructor neₜ
+  open _⊩ne_ [A]
+  field
+    k   : Term ℓ
+    d   : Γ ⊢ t :⇒*: k ∷ K
+    nf  : Γ ⊩neNf k ∷ K
+
+-- Neutral term equality
+record _⊩ne_≡_∷_/_ (Γ : Con Term ℓ) (t u A : Term ℓ) ([A] : Γ ⊩ne A) : Set a where
+  constructor neₜ₌
+  open _⊩ne_ [A]
+  field
+    k m : Term ℓ
+    d   : Γ ⊢ t :⇒*: k ∷ K
+    d′  : Γ ⊢ u :⇒*: m ∷ K
+    nf  : Γ ⊩neNf k ≡ m ∷ K
+
+
 -- Logical relation
 -- Exported interface
 record LogRelKit : Set (lsuc a) where
   constructor Kit
   field
-    -- TODO: Include _⊩ne_ and perhaps more fields here?
-    _⊩ne_ : Con Term ℓ → Term ℓ → Set a
     _⊩U_ : Con Term ℓ → Term ℓ → Set a
     _⊩B⟨_⟩_ : (Γ : Con Term ℓ) (W : BindingType) → Term ℓ → Set a
     _⊩Id_ : Con Term ℓ → Term ℓ → Set a
+    -- TODO: Include _⊩ne_ and perhaps more fields here?
+    -- _⊩ne_ : Con Term ℓ → Term ℓ → Set a
 
     _⊩_ : (Γ : Con Term ℓ) → Term ℓ → Set a
     _⊩_≡_/_ : (Γ : Con Term ℓ) (A B : Term ℓ) → Γ ⊩ A → Set a
@@ -260,51 +307,6 @@ record LogRelKit : Set (lsuc a) where
     _⊩_≡_∷_/_ : (Γ : Con Term ℓ) (t u A : Term ℓ) → Γ ⊩ A → Set a
 
 module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) where
-
-  -- Reducibility of Neutrals part 2:
-
-  -- Neutral type
-  record _⊩ne_ {ℓ : Nat} (Γ : Con Term ℓ) (A : Term ℓ) : Set a where
-    constructor ne
-    field
-      l′          : TypeLevel
-      K           : Term ℓ
-      D           : Γ ⊢ A :⇒*: K
-      neK         : Neutral K
-      lower-level : l′ < l
-      K≡K         : Γ ⊢ K ~ K ∷ U l′
-
-  -- Neutral type equality
-  record _⊩ne_≡_/_ (Γ : Con Term ℓ) (A B : Term ℓ) ([A] : Γ ⊩ne A) : Set a where
-    constructor ne₌
-    open _⊩ne_ [A]
-    field
-      l′          : TypeLevel
-      M           : Term ℓ
-      D′          : Γ ⊢ B :⇒*: M
-      neM         : Neutral M
-      lower-level : l′ < l
-      K≡M         : Γ ⊢ K ~ M ∷ U l′
-
-  -- Neutral term
-  record _⊩ne_∷_/_ (Γ : Con Term ℓ) (t A : Term ℓ) ([A] : Γ ⊩ne A) : Set a where
-    inductive
-    constructor neₜ
-    open _⊩ne_ [A]
-    field
-      k   : Term ℓ
-      d   : Γ ⊢ t :⇒*: k ∷ K
-      nf  : Γ ⊩neNf k ∷ K
-
-  -- Neutral term equality
-  record _⊩ne_≡_∷_/_ (Γ : Con Term ℓ) (t u A : Term ℓ) ([A] : Γ ⊩ne A) : Set a where
-    constructor neₜ₌
-    open _⊩ne_ [A]
-    field
-      k m : Term ℓ
-      d   : Γ ⊢ t :⇒*: k ∷ K
-      d′  : Γ ⊢ u :⇒*: m ∷ K
-      nf  : Γ ⊩neNf k ≡ m ∷ K
 
   -- Reducibility of Universe:
 
@@ -611,7 +613,7 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
       where open LogRelKit (rec l<)
 
     _⊩ₗ_∷_/_ : (Γ : Con Term ℓ) (t A : Term ℓ) → Γ ⊩ₗ A → Set a
-    Γ ⊩ₗ t ∷ .U / Uᵣ p = Γ ⊩₁U t ∷U/ l<
+    Γ ⊩ₗ t ∷ A / Uᵣ p = Γ ⊩₁U t ∷U/ _⊩₁U_.l< p
     Γ ⊩ₗ t ∷ A / ℕᵣ D = Γ ⊩ℕ t ∷ℕ
     Γ ⊩ₗ t ∷ A / Emptyᵣ D = Γ ⊩Empty t ∷Empty
     Γ ⊩ₗ t ∷ A / Unitᵣ {s = s} D = Γ ⊩Unit⟨ s ⟩ t ∷Unit
@@ -623,7 +625,7 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
       where open LogRelKit (rec l<)
 
     _⊩ₗ_≡_∷_/_ : (Γ : Con Term ℓ) (t u A : Term ℓ) → Γ ⊩ₗ A → Set a
-    Γ ⊩ₗ t ≡ u ∷ .U / Uᵣ (Uᵣ l′ l< ⊢Γ) = Γ ⊩₁U t ≡ u ∷U/ l<
+    Γ ⊩ₗ t ≡ u ∷ A / Uᵣ (Uᵣ l′ l< ⊢Γ) = Γ ⊩₁U t ≡ u ∷U/ l<
     Γ ⊩ₗ t ≡ u ∷ A / ℕᵣ D = Γ ⊩ℕ t ≡ u ∷ℕ
     Γ ⊩ₗ t ≡ u ∷ A / Emptyᵣ D = Γ ⊩Empty t ≡ u ∷Empty
     Γ ⊩ₗ t ≡ u ∷ A / Unitᵣ {s = s} D = Γ ⊩Unit⟨ s ⟩ t ≡ u ∷Unit
@@ -641,7 +643,7 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
 open LogRel public
   using
     (Uᵣ; ℕᵣ; Emptyᵣ; Unitᵣ; ne; Bᵣ; B₌; Idᵣ; Id₌; emb; Uₜ; Uₜ₌;
-     module _⊩₁U; module _⊩₁U_∷U/_; module _⊩₁U_≡_∷U/_;
+     module _⊩₁U_; module _⊩₁U_∷U/_; module _⊩₁U_≡_∷U/_;
      module _⊩ₗB⟨_⟩_; module _⊩ₗB⟨_⟩_≡_/_;
      module _⊩ₗId_; module _⊩ₗId_≡_/_)
 
@@ -652,16 +654,20 @@ pattern Σₜ p d p≡p pProd prop =  p , d , p≡p , pProd , prop
 pattern Σₜ₌ p r d d′ pProd rProd p≅r [t] [u] prop = p , r , d , d′ , p≅r , [t] , [u] , pProd , rProd , prop
 
 pattern Uᵣ′ a b c = Uᵣ (Uᵣ a b c)
-pattern ne′ a b c d = ne (ne a b c d)
+pattern ne′ a b c d e f = ne (ne a b c d e f)
 pattern Bᵣ′ W a b c d e f g h i j = Bᵣ W (Bᵣ a b c d e f g h i j)
 pattern Πᵣ′ a b c d e f g h i j = Bᵣ′ BΠ! a b c d e f g h i j
 pattern 𝕨′ a b c d e f g h i j = Bᵣ′ BΣ! a b c d e f g h i j
 
 kit : TypeLevel → LogRelKit
-kit ℓ = LogRel.kit ℓ (λ { 0<1 → kit ⁰ })
+kit ℓ = LogRel.kit ℓ (λ { {l'} → <-rec (λ x → x < ℓ → LogRelKit) help l' })
+  where
+    help : _
+    help Nat.zero rec (Tools.Nat.s≤s l<) = {!!}
+    help (1+ n) rec (Tools.Nat.s≤s l<) = rec {!!} {!!}
 
-_⊩′⟨_⟩U : (Γ : Con Term ℓ) (l : TypeLevel) → Set a
-Γ ⊩′⟨ l ⟩U = Γ ⊩U where open LogRelKit (kit l)
+_⊩′⟨_⟩U_ : (Γ : Con Term ℓ) (l : TypeLevel) (A : Term ℓ) → Set a
+Γ ⊩′⟨ l ⟩U A = Γ ⊩U A where open LogRelKit (kit l)
 
 _⊩′⟨_⟩B⟨_⟩_ : (Γ : Con Term ℓ) (l : TypeLevel) (W : BindingType) → Term ℓ → Set a
 Γ ⊩′⟨ l ⟩B⟨ W ⟩ A = Γ ⊩B⟨ W ⟩ A where open LogRelKit (kit l)

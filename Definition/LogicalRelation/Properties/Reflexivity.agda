@@ -58,12 +58,11 @@ reflEqTerm : ∀ {l A t} ([A] : Γ ⊩⟨ l ⟩ A)
            → Γ ⊩⟨ l ⟩ t ∷ A / [A]
            → Γ ⊩⟨ l ⟩ t ≡ t ∷ A / [A]
 
-reflEq (Uᵣ′ l′ l< ⊢Γ) = PE.refl
+reflEq (Uᵣ′ l′ l< ⊢Γ) = ⊢Γ
 reflEq (ℕᵣ D) = red D
 reflEq (Emptyᵣ D) = red D
 reflEq (Unitᵣ (Unitₜ D _)) = red D
-reflEq (ne′ K [ ⊢A , ⊢B , D ] neK K≡K) =
-   ne₌ _ [ ⊢A , ⊢B , D ] neK K≡K
+reflEq (ne′ K t D neK K<l tet ) = ne₌ K t D neK K<l tet
 reflEq (Bᵣ′ _ _ _ [ _ , _ , D ] _ _ A≡A [F] [G] _ _) =
    B₌ _ _ D A≡A
       (λ ρ ⊢Δ → reflEq ([F] ρ ⊢Δ))
