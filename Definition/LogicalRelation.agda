@@ -1,7 +1,6 @@
 ------------------------------------------------------------------------
 -- The logical relation for reducibility
 ------------------------------------------------------------------------
-{-# OPTIONS --allow-unsolved-metas #-}
 
 open import Definition.Typed.EqualityRelation
 open import Definition.Typed.Restrictions
@@ -660,11 +659,10 @@ pattern Πᵣ′ a b c d e f g h i j = Bᵣ′ BΠ! a b c d e f g h i j
 pattern 𝕨′ a b c d e f g h i j = Bᵣ′ BΣ! a b c d e f g h i j
 
 kit : TypeLevel → LogRelKit
-kit ℓ = LogRel.kit ℓ (λ { {l'} → <-rec (λ x → x < ℓ → LogRelKit) help l' })
+kit ℓ = LogRel.kit ℓ helper
   where
-    help : _
-    help Nat.zero rec (Tools.Nat.s≤s l<) = {!!}
-    help (1+ n) rec (Tools.Nat.s≤s l<) = rec {!!} {!!}
+   helper : {ℓ l′ : TypeLevel} → l′ < ℓ → LogRelKit
+   helper {ℓ = 1+ n} {_} (Tools.Nat.s≤s p) = kit n
 
 _⊩′⟨_⟩U_ : (Γ : Con Term ℓ) (l : TypeLevel) (A : Term ℓ) → Set a
 Γ ⊩′⟨ l ⟩U A = Γ ⊩U A where open LogRelKit (kit l)
