@@ -246,7 +246,7 @@ data _≤_ (l : TypeLevel) : TypeLevel → Set where
 -- Reducibility of Neutrals part 2:
 
 -- Neutral type
-record _⊩ne_ {ℓ : Nat} (Γ : Con Term ℓ) (A : Term ℓ) : Set a where
+record _⊩ne⟨_⟩_ {ℓ : Nat} (Γ : Con Term ℓ) (l : TypeLevel) (A : Term ℓ) : Set a where
   constructor ne
   field
     l′          : TypeLevel
@@ -257,9 +257,9 @@ record _⊩ne_ {ℓ : Nat} (Γ : Con Term ℓ) (A : Term ℓ) : Set a where
     K≡K         : Γ ⊢ K ~ K ∷ U l′
 
 -- Neutral type equality
-record _⊩ne_≡_/_ (Γ : Con Term ℓ) (A B : Term ℓ) ([A] : Γ ⊩ne A) : Set a where
+record _⊩ne⟨_⟩_≡_/_ (Γ : Con Term ℓ) (l : TypeLevel) (A B : Term ℓ) ([A] : Γ ⊩ne⟨ l ⟩ A) : Set a where
   constructor ne₌
-  open _⊩ne_ [A]
+  open _⊩ne⟨_⟩_ [A]
   field
     l′          : TypeLevel
     M           : Term ℓ
@@ -269,19 +269,19 @@ record _⊩ne_≡_/_ (Γ : Con Term ℓ) (A B : Term ℓ) ([A] : Γ ⊩ne A) : S
     K≡M         : Γ ⊢ K ~ M ∷ U l′
 
 -- Neutral term
-record _⊩ne_∷_/_ (Γ : Con Term ℓ) (t A : Term ℓ) ([A] : Γ ⊩ne A) : Set a where
+record _⊩ne⟨_⟩_∷_/_ (Γ : Con Term ℓ) (l : TypeLevel) (t A : Term ℓ) ([A] : Γ ⊩ne⟨ l ⟩ A) : Set a where
   inductive
   constructor neₜ
-  open _⊩ne_ [A]
+  open _⊩ne⟨_⟩_ [A]
   field
     k   : Term ℓ
     d   : Γ ⊢ t :⇒*: k ∷ K
     nf  : Γ ⊩neNf k ∷ K
 
 -- Neutral term equality
-record _⊩ne_≡_∷_/_ (Γ : Con Term ℓ) (t u A : Term ℓ) ([A] : Γ ⊩ne A) : Set a where
+record _⊩ne⟨_⟩_≡_∷_/_ (Γ : Con Term ℓ) (l : TypeLevel) (t u A : Term ℓ) ([A] : Γ ⊩ne⟨ l ⟩ A) : Set a where
   constructor neₜ₌
-  open _⊩ne_ [A]
+  open _⊩ne⟨_⟩_ [A]
   field
     k m : Term ℓ
     d   : Γ ⊢ t :⇒*: k ∷ K
@@ -594,7 +594,7 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
       ℕᵣ  : ∀ {A} → Γ ⊩ℕ A → Γ ⊩ₗ A
       Emptyᵣ : ∀ {A} → Γ ⊩Empty A → Γ ⊩ₗ A
       Unitᵣ : ∀ {A} {s : Strength} → Γ ⊩Unit⟨ s ⟩ A → Γ ⊩ₗ A
-      ne  : ∀ {A} → Γ ⊩ne A → Γ ⊩ₗ A
+      ne  : ∀ {A} → Γ ⊩ne⟨ l ⟩ A → Γ ⊩ₗ A
       Bᵣ  : ∀ {A} W → Γ ⊩ₗB⟨ W ⟩ A → Γ ⊩ₗ A
       Idᵣ : ∀ {A} → Γ ⊩ₗId A → Γ ⊩ₗ A
       emb : ∀ {A l′} (l< : l′ < l) (let open LogRelKit (rec l<))
@@ -605,7 +605,7 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
     Γ ⊩ₗ A ≡ B / ℕᵣ D = Γ ⊩ℕ A ≡ B
     Γ ⊩ₗ A ≡ B / Emptyᵣ D = Γ ⊩Empty A ≡ B
     Γ ⊩ₗ A ≡ B / Unitᵣ {s = s} D = Γ ⊩Unit⟨ s ⟩ A ≡ B
-    Γ ⊩ₗ A ≡ B / ne neA = Γ ⊩ne A ≡ B / neA
+    Γ ⊩ₗ A ≡ B / ne neA = Γ ⊩ne⟨ l ⟩ A ≡ B / neA
     Γ ⊩ₗ A ≡ B / Bᵣ W BA = Γ ⊩ₗB⟨ W ⟩ A ≡ B / BA
     Γ ⊩ₗ A ≡ B / Idᵣ ⊩A = Γ ⊩ₗId A ≡ B / ⊩A
     Γ ⊩ₗ A ≡ B / emb l< [A] = Γ ⊩ A ≡ B / [A]
@@ -616,7 +616,7 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
     Γ ⊩ₗ t ∷ A / ℕᵣ D = Γ ⊩ℕ t ∷ℕ
     Γ ⊩ₗ t ∷ A / Emptyᵣ D = Γ ⊩Empty t ∷Empty
     Γ ⊩ₗ t ∷ A / Unitᵣ {s = s} D = Γ ⊩Unit⟨ s ⟩ t ∷Unit
-    Γ ⊩ₗ t ∷ A / ne neA = Γ ⊩ne t ∷ A / neA
+    Γ ⊩ₗ t ∷ A / ne neA = Γ ⊩ne⟨ l ⟩ t ∷ A / neA
     Γ ⊩ₗ t ∷ A / Bᵣ BΠ! ΠA  = Γ ⊩ₗΠ t ∷ A / ΠA
     Γ ⊩ₗ t ∷ A / Bᵣ BΣ! ΣA  = Γ ⊩ₗΣ t ∷ A / ΣA
     Γ ⊩ₗ t ∷ A / Idᵣ ⊩A = Γ ⊩ₗId t ∷ A / ⊩A
@@ -628,7 +628,7 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
     Γ ⊩ₗ t ≡ u ∷ A / ℕᵣ D = Γ ⊩ℕ t ≡ u ∷ℕ
     Γ ⊩ₗ t ≡ u ∷ A / Emptyᵣ D = Γ ⊩Empty t ≡ u ∷Empty
     Γ ⊩ₗ t ≡ u ∷ A / Unitᵣ {s = s} D = Γ ⊩Unit⟨ s ⟩ t ≡ u ∷Unit
-    Γ ⊩ₗ t ≡ u ∷ A / ne neA = Γ ⊩ne t ≡ u ∷ A / neA
+    Γ ⊩ₗ t ≡ u ∷ A / ne neA = Γ ⊩ne⟨ l ⟩ t ≡ u ∷ A / neA
     Γ ⊩ₗ t ≡ u ∷ A / Bᵣ BΠ! ΠA = Γ ⊩ₗΠ t ≡ u ∷ A / ΠA
     Γ ⊩ₗ t ≡ u ∷ A / Bᵣ BΣ! ΣA  = Γ ⊩ₗΣ t ≡ u ∷ A / ΣA
     Γ ⊩ₗ t ≡ u ∷ A / Idᵣ ⊩A = Γ ⊩ₗId t ≡ u ∷ A / ⊩A
