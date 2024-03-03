@@ -24,7 +24,7 @@ open import Definition.Typed.Weakening R
 open import Tools.Empty
 open import Tools.Function
 open import Tools.Level
-open import Tools.Nat using (Nat; 1+; <-rec)
+open import Tools.Nat using (Nat; 1+; s≤s)
 open import Tools.Product
 import Tools.PropositionalEquality as PE
 open import Tools.Unit
@@ -250,10 +250,10 @@ record _⊩ne⟨_⟩_ {ℓ : Nat} (Γ : Con Term ℓ) (l : TypeLevel) (A : Term 
   constructor ne
   field
     l′          : TypeLevel
+    lower-level : l′ < l
     K           : Term ℓ
     D           : Γ ⊢ A :⇒*: K
     neK         : Neutral K
-    lower-level : l′ < l
     K≡K         : Γ ⊢ K ~ K ∷ U l′
 
 -- Neutral type equality
@@ -262,10 +262,10 @@ record _⊩ne⟨_⟩_≡_/_ (Γ : Con Term ℓ) (l : TypeLevel) (A B : Term ℓ)
   open _⊩ne⟨_⟩_ [A]
   field
     l′          : TypeLevel
+    lower-level : l′ < l
     M           : Term ℓ
     D′          : Γ ⊢ B :⇒*: M
     neM         : Neutral M
-    lower-level : l′ < l
     K≡M         : Γ ⊢ K ~ M ∷ U l′
 
 -- Neutral term
@@ -659,10 +659,7 @@ pattern Πᵣ′ a b c d e f g h i j = Bᵣ′ BΠ! a b c d e f g h i j
 pattern 𝕨′ a b c d e f g h i j = Bᵣ′ BΣ! a b c d e f g h i j
 
 kit : TypeLevel → LogRelKit
-kit ℓ = LogRel.kit ℓ helper
-  where
-   helper : {ℓ l′ : TypeLevel} → l′ < ℓ → LogRelKit
-   helper {ℓ = 1+ n} {_} (Tools.Nat.s≤s p) = kit n
+kit ℓ = LogRel.kit ℓ (λ { (s≤s {n = n} l) → kit n })
 
 _⊩′⟨_⟩U_ : (Γ : Con Term ℓ) (l : TypeLevel) (A : Term ℓ) → Set a
 Γ ⊩′⟨ l ⟩U A = Γ ⊩U A where open LogRelKit (kit l)

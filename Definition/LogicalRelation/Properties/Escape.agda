@@ -40,27 +40,28 @@ private
 
 -- Reducible types are well-formed.
 escape : ∀ {l A} → Γ ⊩⟨ l ⟩ A → Γ ⊢ A
-escape (Uᵣ′ l′ l< ⊢Γ) = Uⱼ ⊢Γ
+escape (Uᵣ′ l′ l< [ ⊢A , ⊢B , D ]) = ⊢A
 escape (ℕᵣ [ ⊢A , ⊢B , D ]) = ⊢A
 escape (Emptyᵣ [ ⊢A , ⊢B , D ]) = ⊢A
 escape (Unitᵣ (Unitₜ [ ⊢A , ⊢B , D ] _)) = ⊢A
-escape (ne′ K [ ⊢A , ⊢B , D ] neK K≡K) = ⊢A
+escape (ne′ l′ l< K [ ⊢A , ⊢B , D ] neK K≡K) = ⊢A
 escape (Bᵣ′ _ _ _ [ ⊢A , _ , _ ] _ _ _ _ _ _ _) = ⊢A
 escape (Idᵣ ⊩A) = ⊢A-red (_⊩ₗId_.⇒*Id ⊩A)
-escape (emb 0<1 A) = escape A
+escape (emb (s≤s _) A) = escape A
 
 -- Reducible terms are well-formed.
 escapeTerm : ∀ {l A t} → ([A] : Γ ⊩⟨ l ⟩ A)
               → Γ ⊩⟨ l ⟩ t ∷ A / [A]
               → Γ ⊢ t ∷ A
-escapeTerm (Uᵣ′ l′ l< ⊢Γ) (Uₜ A [ ⊢t , ⊢u , d ] typeA A≡A [A]) = ⊢t
+escapeTerm (Uᵣ′ l′ l< ⊢Γ) (Uₜ A [ ⊢t , ⊢u , d ] typeA A≡A [A]) =
+  conv  ⊢t (sym ( subset* (red  ⊢Γ)))
 escapeTerm (ℕᵣ D) (ℕₜ n [ ⊢t , ⊢u , d ] t≡t prop) =
   conv ⊢t (sym (subset* (red D)))
 escapeTerm (Emptyᵣ D) (Emptyₜ e [ ⊢t , ⊢u , d ] t≡t prop) =
   conv ⊢t (sym (subset* (red D)))
 escapeTerm (Unitᵣ (Unitₜ D _)) (Unitₜ e [ ⊢t , ⊢u , d ] _ prop) =
   conv ⊢t (sym (subset* (red D)))
-escapeTerm (ne′ K D neK K≡K) (neₜ k [ ⊢t , ⊢u , d ] nf) =
+escapeTerm (ne′ l′ l< K D neK K≡K) (neₜ k [ ⊢t , ⊢u , d ] nf) =
   conv ⊢t (sym (subset* (red D)))
 escapeTerm (Bᵣ′ BΠ! _ _ D _ _ _ _ _ _ _) (Πₜ _ [ ⊢t , _ , _ ] _ _ _ _) =
   conv ⊢t (sym (subset* (red D)))
@@ -68,7 +69,7 @@ escapeTerm (Bᵣ′ BΣ! _ _ D _ _ _ _ _ _ _) (Σₜ _ [ ⊢t , _ , _ ] _ _ _) =
   conv ⊢t (sym (subset* (red D)))
 escapeTerm (Idᵣ ⊩A) (_ , t⇒*u , _) =
   conv (⊢t-redₜ t⇒*u) (sym (subset* (red (_⊩ₗId_.⇒*Id ⊩A))))
-escapeTerm (emb 0<1 A) t = escapeTerm A t
+escapeTerm (emb (s≤s 0<1) A) t = escapeTerm A t
 
 -- Reducible type equality is contained in the equality relation.
 escapeEq :
@@ -100,25 +101,24 @@ Id≅Id {⊩A = ⊩A} A≡B =
   open _⊩ₗId_ ⊩A
   open _⊩ₗId_≡_/_ A≡B
 
-escapeEq (Uᵣ′ l′ l< ⊢Γ) PE.refl = ≅-Urefl ⊢Γ
+escapeEq (Uᵣ′ l′ l< [ ⊢A , ⊢B , D ]) [ ⊢A₁ , ⊢B₁ , D₁ ] =
+  ≅-red D  D₁ Uₙ Uₙ ((≅-Urefl (wf ⊢A)))
 escapeEq (ℕᵣ [ ⊢A , ⊢B , D ]) D′ = ≅-red D D′ ℕₙ ℕₙ (≅-ℕrefl (wf ⊢A))
 escapeEq (Emptyᵣ [ ⊢A , ⊢B , D ]) D′ =
   ≅-red D D′ Emptyₙ Emptyₙ (≅-Emptyrefl (wf ⊢A))
 escapeEq (Unitᵣ (Unitₜ [ ⊢A , ⊢B , D ] ok)) D′ =
   ≅-red D D′ Unitₙ Unitₙ (≅-Unitrefl (wf ⊢A) ok)
-escapeEq (ne′ K D neK K≡K) (ne₌ M D′ neM K≡M) =
+escapeEq (ne′ _ _ K D neK K≡K) (ne₌ _ _ M D′ neM K≡M) =
   ≅-red (red D) (red D′) (ne neK) (ne neM) (~-to-≅ K≡M)
 escapeEq (Bᵣ′ W _ _ D _ _ _ _ _ _ _) (B₌ _ _ D′ A≡B _ _) =
   ≅-red (red D) D′ ⟦ W ⟧ₙ ⟦ W ⟧ₙ A≡B
 escapeEq (Idᵣ ⊩A) A≡B =
   ≅-red (red (_⊩ₗId_.⇒*Id ⊩A)) (red (_⊩ₗId_≡_/_.⇒*Id′ A≡B)) Idₙ Idₙ
     (Id≅Id A≡B)
-escapeEq (emb 0<1 A) A≡B = escapeEq A A≡B
+escapeEq (emb (s≤s _) A) A≡B = escapeEq A A≡B
 
-escapeTermEq
-  (Uᵣ′ l′ l< ⊢Γ) (Uₜ₌ A B d d′ typeA typeB A≡B [A] [B] [A≡B]) =
-  ≅ₜ-red (id (Uⱼ ⊢Γ)) (redₜ d) (redₜ d′) Uₙ
-    (typeWhnf typeA) (typeWhnf typeB) A≡B
+escapeTermEq (Uᵣ′ l′ l< [ ⊢A , ⊢B , D ]) (Uₜ₌ A B d d′ typeA typeB A≡B [A] [B] [A≡B]) =
+  ≅ₜ-red D (redₜ d) (redₜ d′) Uₙ (typeWhnf typeA) (typeWhnf typeB)  A≡B
 escapeTermEq (ℕᵣ D) (ℕₜ₌ k k′ d d′ k≡k′ prop) =
   let natK , natK′ = split prop
   in  ≅ₜ-red (red D) (redₜ d) (redₜ d′) ℕₙ
@@ -135,7 +135,7 @@ escapeTermEq {l} {Γ} {A} {t} {u} (Unitᵣ {s = 𝕨} (Unitₜ D _)) (Unitₜ₌
   let whK , whK′ = usplit prop
   in  ≅ₜ-red (red D) (redₜ d) (redₜ d′) Unitₙ
              whK whK′ k≡k′
-escapeTermEq (ne′ K D neK K≡K)
+escapeTermEq (ne′ l′ l< K D neK K≡K)
                  (neₜ₌ k m d d′ (neNfₜ₌ neT neU t≡u)) =
   ≅ₜ-red (red D) (redₜ d) (redₜ d′) (ne neK) (ne neT) (ne neU)
          (~-to-≅ₜ t≡u)
@@ -164,7 +164,7 @@ escapeTermEq {Γ = Γ} (Idᵣ ⊩A) t≡u@(_ , _ , t⇒*t′ , u⇒*u′ , _) =
   open _⊩ₗId_ ⊩A
 
   lemma = ≅ₜ-red (red ⇒*Id) (redₜ t⇒*t′) (redₜ u⇒*u′) Idₙ
-escapeTermEq (emb 0<1 A) t≡u = escapeTermEq A t≡u
+escapeTermEq (emb (s≤s _) A) t≡u = escapeTermEq A t≡u
 
 -- If the type Unit (of some mode) is in the logical relation, then the
 -- Unit type (of the same mode) is allowed.
@@ -172,6 +172,11 @@ escapeTermEq (emb 0<1 A) t≡u = escapeTermEq A t≡u
 ⊩Unit→Unit-allowed :
   Γ ⊩⟨ l ⟩ Unit s → Unit-allowed s
 ⊩Unit→Unit-allowed {Γ = Γ} = λ where
+  (Uᵣ′ l′ l< [ ⊢Unit , _ , D ]) →
+                  $⟨ D , Uₙ ⟩
+    Γ ⊢ Unit! ↘ (U l′)  →⟨ flip whrDet* (id ⊢Unit , Unitₙ) ⟩
+    (U l′) PE.≡ Unit!   →⟨ (case_of λ ()) ⟩
+    Unit-allowed _  □
   (ℕᵣ [ ⊢Unit , _ , D ]) →
                   $⟨ D , ℕₙ ⟩
     Γ ⊢ Unit! ↘ ℕ  →⟨ flip whrDet* (id ⊢Unit , Unitₙ) ⟩
@@ -184,7 +189,7 @@ escapeTermEq (emb 0<1 A) t≡u = escapeTermEq A t≡u
     Unit-allowed _     □
   (Unitᵣ (Unitₜ [ _ , _ , D ] ok)) → case whnfRed* D Unitₙ of λ where
     PE.refl → ok
-  (ne (ne A [ ⊢Unit , _ , D ] neA _)) →
+  (ne (ne l′ l< A [ ⊢Unit , _ , D ] neA _)) →
                   $⟨ D , ne neA ⟩
     Γ ⊢ Unit! ↘ A  →⟨ whrDet* (id ⊢Unit , Unitₙ) ⟩
     Unit! PE.≡ A   →⟨ ⊥-elim ∘→ Unit≢ne neA ⟩
@@ -200,8 +205,7 @@ escapeTermEq (emb 0<1 A) t≡u = escapeTermEq A t≡u
     Γ ⊢ Unit! ↘ Id Ty lhs rhs  →⟨ whrDet* (id (⊢A-red ⇒*Id) , Unitₙ) ⟩
     Unit! PE.≡ Id Ty lhs rhs   →⟨ (λ ()) ⟩
     Unit-allowed _             □
-  (emb 0<1 [Unit]) →
-    ⊩Unit→Unit-allowed [Unit]
+  (emb (s≤s _) [Unit]) → ⊩Unit→Unit-allowed [Unit]
 
 -- If the type ΠΣ⟨ b ⟩ p , q ▷ A ▹ B is in the logical relation, then
 -- it is allowed.
@@ -210,13 +214,15 @@ escapeTermEq (emb 0<1 A) t≡u = escapeTermEq A t≡u
   Γ ⊩⟨ l ⟩ ΠΣ⟨ b ⟩ p , q ▷ A ▹ B →
   ΠΣ-allowed b p q
 ⊩ΠΣ→ΠΣ-allowed {b = b} = λ where
+  (Uᵣ′ l′ l< [ ⊢ΠAB , _ , D ]) →
+     ⊥-elim ( U≢ΠΣ b ( (whrDet* (D , Uₙ) (id ⊢ΠAB , ΠΣₙ))))
   (ℕᵣ [ ⊢ΠAB , _ , D ]) →
     ⊥-elim (ℕ≢ΠΣ b (whrDet* (D , ℕₙ) (id ⊢ΠAB , ΠΣₙ)))
   (Emptyᵣ [ ⊢ΠAB , _ , D ]) →
     ⊥-elim (Empty≢ΠΣ b (whrDet* (D , Emptyₙ) (id ⊢ΠAB , ΠΣₙ)))
   (Unitᵣ (Unitₜ [ ⊢ΠAB , _ , D ] _)) →
     ⊥-elim (Unit≢ΠΣ b (whrDet* (D , Unitₙ) (id ⊢ΠAB , ΠΣₙ)))
-  (ne (ne _ [ ⊢ΠAB , _ , D ] neK _)) →
+  (ne (ne  l′ l< _ [ ⊢ΠAB , _ , D ] neK _)) →
     ⊥-elim (ΠΣ≢ne b neK (whrDet* (id ⊢ΠAB , ΠΣₙ) (D , ne neK)))
   (Bᵣ′ (BM BMΠ _ _) _ _ [ ⊢ΠAB , _ , D ] _ _ _ _ _ _ ok) →
     case whrDet* (id ⊢ΠAB , ΠΣₙ) (D , ΠΣₙ) of λ {
@@ -229,5 +235,5 @@ escapeTermEq (emb 0<1 A) t≡u = escapeTermEq A t≡u
   (Idᵣ ⊩A) →
     let open _⊩ₗId_ ⊩A in
     ⊥-elim (Id≢ΠΣ b (whrDet* (red ⇒*Id , Idₙ) (id (⊢A-red ⇒*Id) , ΠΣₙ)))
-  (emb 0<1 [ΠΣ]) →
+  (emb (s≤s _) [ΠΣ]) →
     ⊩ΠΣ→ΠΣ-allowed [ΠΣ]

@@ -62,7 +62,7 @@ reflEq (Uᵣ′ l′ l< ⊢Γ) = ⊢Γ
 reflEq (ℕᵣ D) = red D
 reflEq (Emptyᵣ D) = red D
 reflEq (Unitᵣ (Unitₜ D _)) = red D
-reflEq (ne′ K t D neK K<l tet ) = ne₌ K t D neK K<l tet
+reflEq (ne′ l′ l< K D neK K≡K ) = ne₌ l′ l< K D neK K≡K
 reflEq (Bᵣ′ _ _ _ [ _ , _ , D ] _ _ A≡A [F] [G] _ _) =
    B₌ _ _ D A≡A
       (λ ρ ⊢Δ → reflEq ([F] ρ ⊢Δ))
