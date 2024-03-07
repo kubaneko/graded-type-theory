@@ -234,8 +234,9 @@ TypeLevel = Nat
 pattern  ⁰  = 0
 pattern  ¹ = 1
 
+open import Data.Nat using (_<′_; ≤′-refl; ≤′-step)
 _<_ : (i j : TypeLevel) → Set
-i < j = i Tools.Nat.< j
+i < j = i <′ j
 
 -- Ordering of type levels.
 
@@ -305,7 +306,7 @@ record LogRelKit : Set (lsuc a) where
     _⊩_∷_/_ : (Γ : Con Term ℓ) (t A : Term ℓ) → Γ ⊩ A → Set a
     _⊩_≡_∷_/_ : (Γ : Con Term ℓ) (t u A : Term ℓ) → Γ ⊩ A → Set a
 
-module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) where
+module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ <′ l → LogRelKit) where
 
   -- Reducibility of Universe:
 
@@ -658,8 +659,14 @@ pattern Bᵣ′ W a b c d e f g h i j = Bᵣ W (Bᵣ a b c d e f g h i j)
 pattern Πᵣ′ a b c d e f g h i j = Bᵣ′ BΠ! a b c d e f g h i j
 pattern 𝕨′ a b c d e f g h i j = Bᵣ′ BΣ! a b c d e f g h i j
 
-kit : TypeLevel → LogRelKit
-kit ℓ = LogRel.kit ℓ (λ { (s≤s {n = n} l) → kit n })
+mutual
+  kit : TypeLevel → LogRelKit
+  kit ℓ = LogRel.kit ℓ kit-helper
+
+  kit-helper : {n m : TypeLevel} → m < n → LogRelKit
+  kit-helper {m = m} ≤′-refl = kit m
+  kit-helper (≤′-step p) = kit-helper p
+
 
 _⊩′⟨_⟩U_ : (Γ : Con Term ℓ) (l : TypeLevel) (A : Term ℓ) → Set a
 Γ ⊩′⟨ l ⟩U A = Γ ⊩U A where open LogRelKit (kit l)
@@ -691,6 +698,14 @@ _⊩⟨_⟩_∷_/_ : (Γ : Con Term ℓ) (l : TypeLevel) (t A : Term ℓ) → Γ
 
 _⊩⟨_⟩_≡_∷_/_ : (Γ : Con Term ℓ) (l : TypeLevel) (t u A : Term ℓ) → Γ ⊩⟨ l ⟩ A → Set a
 Γ ⊩⟨ l ⟩ t ≡ u ∷ A / [A] = Γ ⊩ t ≡ u ∷ A / [A] where open LogRelKit (kit l)
+
+opaque
+  emb-⊩ : {l′ l : TypeLevel} {Γ : Con Term ℓ} {A : Term ℓ} → l′ < l → Γ ⊩⟨ l′ ⟩ A → Γ ⊩⟨ l ⟩ A
+  emb-⊩ p A = emb p (lemma p A)
+    where
+    lemma : {l′ l : TypeLevel} {Γ : Con Term ℓ} {A : Term ℓ} → (p : l′ < l) → Γ ⊩⟨ l′ ⟩ A → LogRelKit._⊩_ (kit-helper p) Γ A
+    lemma ≤′-refl A = A
+    lemma (≤′-step p) A = lemma p A
 
 ------------------------------------------------------------------------
 -- Some definitions related to the identity type
