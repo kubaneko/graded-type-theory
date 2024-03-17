@@ -20,13 +20,15 @@ open import Definition.Typed.Properties R
 open import Definition.LogicalRelation R
 
 open import Tools.Function
-open import Tools.Nat
+open import Tools.Nat using (Nat)
 open import Tools.Product
 import Tools.PropositionalEquality as PE
 
 private
   variable
     n : Nat
+    l′ l : TypeLevel
+    A : Term _
     Γ : Con Term n
 
 reflNatural-prop : ∀ {n}
@@ -77,9 +79,14 @@ reflEq (Idᵣ ⊩A) = record
   }
   where
   open _⊩ₗId_ ⊩A
-reflEq (emb p [A]) = {! reflEq [A] !}
+reflEq (emb p [A]) =  refl-helper p [A] 
+  where
+    open import Data.Nat hiding (_<_)
+    refl-helper : ∀(p : l′ < l) → ([A] : LogRelKit._⊩_ (kit-helper p) Γ A) → Γ ⊩⟨ l ⟩ A ≡ A / emb p [A]
+    refl-helper ≤′-refl [A] = reflEq [A]
+    refl-helper (≤′-step p) [A] = refl-helper p [A]
 
-reflEqTerm = ?
+reflEqTerm = {!!}
 
 -- reflEqTerm (Uᵣ′ k (s≤s 0<1) ⊢Γ) (Uₜ A d typeA A≡A [A]) = Uₜ₌ A A d d typeA typeA A≡A [A] [A] (reflEq [A])
 -- reflEqTerm (ℕᵣ D) (ℕₜ n [ ⊢t , ⊢u , d ] t≡t prop) =
