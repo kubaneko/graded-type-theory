@@ -24,7 +24,7 @@ open import Definition.Typed.Weakening R
 open import Tools.Empty
 open import Tools.Function
 open import Tools.Level
-open import Tools.Nat using (Nat; 1+; s≤s)
+open import Tools.Nat using (Nat; 1+; _<′_; ≤′-step; ≤′-refl)
 open import Tools.Product
 import Tools.PropositionalEquality as PE
 open import Tools.Unit
@@ -234,7 +234,6 @@ TypeLevel = Nat
 pattern  ⁰  = 0
 pattern  ¹ = 1
 
-open import Data.Nat using (_<′_; ≤′-refl; ≤′-step)
 _<_ : (i j : TypeLevel) → Set
 i < j = i <′ j
 

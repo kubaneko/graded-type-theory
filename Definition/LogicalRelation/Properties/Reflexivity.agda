@@ -20,7 +20,7 @@ open import Definition.Typed.Properties R
 open import Definition.LogicalRelation R
 
 open import Tools.Function
-open import Tools.Nat using (Nat)
+open import Tools.Nat using (Nat; ≤′-refl; ≤′-step)
 open import Tools.Product
 import Tools.PropositionalEquality as PE
 
@@ -28,7 +28,7 @@ private
   variable
     n : Nat
     l′ l : TypeLevel
-    A : Term _
+    A B : Term _
     Γ : Con Term n
 
 reflNatural-prop : ∀ {n}
@@ -81,48 +81,49 @@ reflEq (Idᵣ ⊩A) = record
   open _⊩ₗId_ ⊩A
 reflEq (emb p [A]) =  refl-helper p [A] 
   where
-    open import Data.Nat hiding (_<_)
     refl-helper : ∀(p : l′ < l) → ([A] : LogRelKit._⊩_ (kit-helper p) Γ A) → Γ ⊩⟨ l ⟩ A ≡ A / emb p [A]
     refl-helper ≤′-refl [A] = reflEq [A]
     refl-helper (≤′-step p) [A] = refl-helper p [A]
-
-reflEqTerm = {!!}
-
--- reflEqTerm (Uᵣ′ k (s≤s 0<1) ⊢Γ) (Uₜ A d typeA A≡A [A]) = Uₜ₌ A A d d typeA typeA A≡A [A] [A] (reflEq [A])
--- reflEqTerm (ℕᵣ D) (ℕₜ n [ ⊢t , ⊢u , d ] t≡t prop) =
---   ℕₜ₌ n n [ ⊢t , ⊢u , d ] [ ⊢t , ⊢u , d ] t≡t
---       (reflNatural-prop prop)
--- reflEqTerm (Emptyᵣ D) (Emptyₜ n [ ⊢t , ⊢u , d ] t≡t prop) =
---   Emptyₜ₌ n n [ ⊢t , ⊢u , d ] [ ⊢t , ⊢u , d ] t≡t
---     (reflEmpty-prop prop)
--- reflEqTerm (Unitᵣ {s = 𝕤} D) (Unitₜ n [ ⊢t , ⊢u , d ] t≡t prop) =
---   Unitₜ₌ ⊢t ⊢t
--- reflEqTerm (Unitᵣ {s = 𝕨} D) (Unitₜ n [ ⊢t , ⊢u , d ] t≡t prop) =
---   Unitₜ₌ n n [ ⊢t , ⊢u , d ] [ ⊢t , ⊢u , d ]
---          t≡t (reflUnitʷ-prop prop)
--- reflEqTerm (ne′ K D neK K≡K e f) (neₜ k d (neNfₜ neK₁ ⊢k k≡k)) =
---   neₜ₌ k k d d (neNfₜ₌ neK₁ neK₁ k≡k)
--- reflEqTerm
---   (Bᵣ′ BΠ! _ _ _ _ _ _ [F] _ _ _) [t]@(Πₜ f d funcF f≡f [f] _) =
---   Πₜ₌ f f d d funcF funcF f≡f [t] [t]
---       (λ ρ ⊢Δ [a] → [f] ρ ⊢Δ [a] [a] (reflEqTerm ([F] ρ ⊢Δ) [a]))
--- reflEqTerm
---   (Bᵣ′ BΣˢ _ _ _ ⊢F _ _ [F] [G] _ _)
---   [t]@(Σₜ p d p≅p prodP ([fstp] , [sndp])) =
---   Σₜ₌ p p d d prodP prodP p≅p [t] [t]
---       ([fstp] , [fstp] , reflEqTerm ([F] id (wf ⊢F)) [fstp] , reflEqTerm ([G] id (wf ⊢F) [fstp]) [sndp])
--- reflEqTerm
---   (Bᵣ′ BΣʷ _ _ _ ⊢F _ _ [F] [G] _ _)
---   [t]@(Σₜ p d p≅p prodₙ (PE.refl , [p₁] , [p₂] , PE.refl)) =
---   Σₜ₌ p p d d prodₙ prodₙ p≅p [t] [t]
---       (PE.refl , PE.refl , [p₁] , [p₁] , [p₂] , [p₂] ,
---         reflEqTerm ([F] id (wf ⊢F)) [p₁] ,
---         reflEqTerm ([G] id (wf ⊢F) [p₁]) [p₂])
--- reflEqTerm (Bᵣ′ BΣʷ _ _ _ _ _ _ _ _ _ _) [t]@(Σₜ p d p≅p (ne x) p~p) =
---   Σₜ₌ p p d d (ne x) (ne x) p≅p [t] [t] p~p
--- reflEqTerm (Idᵣ _) ⊩t =
---   ⊩Id≡∷ ⊩t ⊩t
---     (case ⊩Id∷-view-inhabited ⊩t of λ where
---        (rflᵣ _)     → _
---        (ne _ t′~t′) → t′~t′)
--- reflEqTerm (emb (s≤s _) [A]) t = reflEqTerm [A] t
+reflEqTerm (Uᵣ′ k p ⊢Γ) (Uₜ A d typeA A≡A [A]) =  Uₜ₌ A A d d typeA typeA A≡A [A] [A] (reflEq {!!} )
+reflEqTerm (ℕᵣ D) (ℕₜ n [ ⊢t , ⊢u , d ] t≡t prop) =
+  ℕₜ₌ n n [ ⊢t , ⊢u , d ] [ ⊢t , ⊢u , d ] t≡t
+      (reflNatural-prop prop)
+reflEqTerm (Emptyᵣ D) (Emptyₜ n [ ⊢t , ⊢u , d ] t≡t prop) =
+  Emptyₜ₌ n n [ ⊢t , ⊢u , d ] [ ⊢t , ⊢u , d ] t≡t
+    (reflEmpty-prop prop)
+reflEqTerm (Unitᵣ {s = 𝕤} D) (Unitₜ n [ ⊢t , ⊢u , d ] t≡t prop) =
+  Unitₜ₌ ⊢t ⊢t
+reflEqTerm (Unitᵣ {s = 𝕨} D) (Unitₜ n [ ⊢t , ⊢u , d ] t≡t prop) =
+  Unitₜ₌ n n [ ⊢t , ⊢u , d ] [ ⊢t , ⊢u , d ]
+         t≡t (reflUnitʷ-prop prop)
+reflEqTerm (ne′ K D neK K≡K e f) (neₜ k d (neNfₜ neK₁ ⊢k k≡k)) =
+  neₜ₌ k k d d (neNfₜ₌ neK₁ neK₁ k≡k)
+reflEqTerm
+  (Bᵣ′ BΠ! _ _ _ _ _ _ [F] _ _ _) [t]@(Πₜ f d funcF f≡f [f] _) =
+  Πₜ₌ f f d d funcF funcF f≡f [t] [t]
+      (λ ρ ⊢Δ [a] → [f] ρ ⊢Δ [a] [a] (reflEqTerm ([F] ρ ⊢Δ) [a]))
+reflEqTerm
+  (Bᵣ′ BΣˢ _ _ _ ⊢F _ _ [F] [G] _ _)
+  [t]@(Σₜ p d p≅p prodP ([fstp] , [sndp])) =
+  Σₜ₌ p p d d prodP prodP p≅p [t] [t]
+      ([fstp] , [fstp] , reflEqTerm ([F] id (wf ⊢F)) [fstp] , reflEqTerm ([G] id (wf ⊢F) [fstp]) [sndp])
+reflEqTerm
+  (Bᵣ′ BΣʷ _ _ _ ⊢F _ _ [F] [G] _ _)
+  [t]@(Σₜ p d p≅p prodₙ (PE.refl , [p₁] , [p₂] , PE.refl)) =
+  Σₜ₌ p p d d prodₙ prodₙ p≅p [t] [t]
+      (PE.refl , PE.refl , [p₁] , [p₁] , [p₂] , [p₂] ,
+        reflEqTerm ([F] id (wf ⊢F)) [p₁] ,
+        reflEqTerm ([G] id (wf ⊢F) [p₁]) [p₂])
+reflEqTerm (Bᵣ′ BΣʷ _ _ _ _ _ _ _ _ _ _) [t]@(Σₜ p d p≅p (ne x) p~p) =
+  Σₜ₌ p p d d (ne x) (ne x) p≅p [t] [t] p~p
+reflEqTerm (Idᵣ _) ⊩t =
+  ⊩Id≡∷ ⊩t ⊩t
+    (case ⊩Id∷-view-inhabited ⊩t of λ where
+       (rflᵣ _)     → _
+       (ne _ t′~t′) → t′~t′)
+reflEqTerm (emb p [A]) t = refl-helper p [A] t
+  where
+    refl-helper : ∀(p : l′ < l) → ([A] : LogRelKit._⊩_ (kit-helper p) Γ B) →
+      Γ ⊩⟨ l ⟩ A ∷ B / emb p [A] → Γ ⊩⟨ l ⟩ A ≡ A ∷ B / emb p [A]
+    refl-helper ≤′-refl [A] t =  reflEqTerm [A] t
+    refl-helper (≤′-step p) [A] t = refl-helper p [A] t
