@@ -698,13 +698,12 @@ _⊩⟨_⟩_∷_/_ : (Γ : Con Term ℓ) (l : TypeLevel) (t A : Term ℓ) → Γ
 _⊩⟨_⟩_≡_∷_/_ : (Γ : Con Term ℓ) (l : TypeLevel) (t u A : Term ℓ) → Γ ⊩⟨ l ⟩ A → Set a
 Γ ⊩⟨ l ⟩ t ≡ u ∷ A / [A] = Γ ⊩ t ≡ u ∷ A / [A] where open LogRelKit (kit l)
 
-opaque
-  emb-⊩ : {l′ l : TypeLevel} {Γ : Con Term ℓ} {A : Term ℓ} → l′ < l → Γ ⊩⟨ l′ ⟩ A → Γ ⊩⟨ l ⟩ A
-  emb-⊩ p A = emb p (lemma p A)
-    where
-    lemma : {l′ l : TypeLevel} {Γ : Con Term ℓ} {A : Term ℓ} → (p : l′ < l) → Γ ⊩⟨ l′ ⟩ A → LogRelKit._⊩_ (kit-helper p) Γ A
-    lemma ≤′-refl A = A
-    lemma (≤′-step p) A = lemma p A
+emb-⊩ : {l′ l : TypeLevel} {Γ : Con Term ℓ} {A : Term ℓ} → l′ < l → Γ ⊩⟨ l′ ⟩ A → Γ ⊩⟨ l ⟩ A
+emb-⊩ p A = emb p (lemma p A)
+  where
+  lemma : {l′ l : TypeLevel} {Γ : Con Term ℓ} {A : Term ℓ} → (p : l′ < l) → Γ ⊩⟨ l′ ⟩ A → LogRelKit._⊩_ (kit-helper p) Γ A
+  lemma ≤′-refl A = A
+  lemma (≤′-step p) A = lemma p A
 
 ------------------------------------------------------------------------
 -- Some definitions related to the identity type
