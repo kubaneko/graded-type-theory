@@ -59,6 +59,9 @@ reflEq : ∀ {l A} ([A] : Γ ⊩⟨ l ⟩ A) → Γ ⊩⟨ l ⟩ A ≡ A / [A]
 reflEqTerm : ∀ {l A t} ([A] : Γ ⊩⟨ l ⟩ A)
            → Γ ⊩⟨ l ⟩ t ∷ A / [A]
            → Γ ⊩⟨ l ⟩ t ≡ t ∷ A / [A]
+refl-helper : ∀(p : l′ < l) → ([A] : LogRelKit._⊩_ (kit-helper p) Γ A) → Γ ⊩⟨ l ⟩ A ≡ A / emb p [A]
+refl-helper ≤′-refl [A] = reflEq [A]
+refl-helper (≤′-step p) [A] = refl-helper p [A]
 
 reflEq (Uᵣ′ l′ l< ⊢Γ) = ⊢Γ
 reflEq (ℕᵣ D) = red D
@@ -80,11 +83,8 @@ reflEq (Idᵣ ⊩A) = record
   where
   open _⊩ₗId_ ⊩A
 reflEq (emb p [A]) =  refl-helper p [A] 
-  where
-    refl-helper : ∀(p : l′ < l) → ([A] : LogRelKit._⊩_ (kit-helper p) Γ A) → Γ ⊩⟨ l ⟩ A ≡ A / emb p [A]
-    refl-helper ≤′-refl [A] = reflEq [A]
-    refl-helper (≤′-step p) [A] = refl-helper p [A]
-reflEqTerm (Uᵣ′ k p ⊢Γ) (Uₜ A d typeA A≡A [A]) =  Uₜ₌ A A d d typeA typeA A≡A [A] [A] (reflEq {!!} )
+
+reflEqTerm (Uᵣ′ k p ⊢Γ) (Uₜ A d typeA A≡A [A]) =  Uₜ₌ A A d d typeA typeA A≡A [A] [A] (refl-helper p [A])
 reflEqTerm (ℕᵣ D) (ℕₜ n [ ⊢t , ⊢u , d ] t≡t prop) =
   ℕₜ₌ n n [ ⊢t , ⊢u , d ] [ ⊢t , ⊢u , d ] t≡t
       (reflNatural-prop prop)
@@ -121,9 +121,9 @@ reflEqTerm (Idᵣ _) ⊩t =
     (case ⊩Id∷-view-inhabited ⊩t of λ where
        (rflᵣ _)     → _
        (ne _ t′~t′) → t′~t′)
-reflEqTerm (emb p [A]) t = refl-helper p [A] t
+reflEqTerm (emb p [A]) t = refl-helper-Term p [A] t
   where
-    refl-helper : ∀(p : l′ < l) → ([A] : LogRelKit._⊩_ (kit-helper p) Γ B) →
+    refl-helper-Term : ∀(p : l′ < l) → ([A] : LogRelKit._⊩_ (kit-helper p) Γ B) →
       Γ ⊩⟨ l ⟩ A ∷ B / emb p [A] → Γ ⊩⟨ l ⟩ A ≡ A ∷ B / emb p [A]
-    refl-helper ≤′-refl [A] t =  reflEqTerm [A] t
-    refl-helper (≤′-step p) [A] t = refl-helper p [A] t
+    refl-helper-Term ≤′-refl [A] t =  reflEqTerm [A] t
+    refl-helper-Term (≤′-step p) [A] t = refl-helper-Term p [A] t

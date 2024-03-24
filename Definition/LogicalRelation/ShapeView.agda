@@ -100,24 +100,24 @@ Id-intr : Γ ⊩⟨ l ⟩Id A → Γ ⊩⟨ l ⟩ A
 Id-intr (noemb ⊩A)   = Idᵣ ⊩A
 Id-intr (emb p ⊩A) = lemma p (Id-intr ⊩A)
 
--- -- Construct a specific reducible type from a general with some criterion
+-- Construct a specific reducible type from a general with some criterion
 
--- U-elim : ∀ {l} → Γ ⊩⟨ l ⟩ U l′ → Γ ⊩⟨ l ⟩U U l′
--- U-elim ⊩U@(Uᵣ′ _ _ ⇒*U) with whnfRed* (red ⇒*U) Uₙ
--- ... | PE.refl = noemb ⊩U
--- U-elim (ℕᵣ D) with whnfRed* (red D) Uₙ
--- ... | ()
+U-elim : ∀ {l} → Γ ⊢ A ⇒* U l′ →  Γ ⊩⟨ l ⟩ A → Γ ⊩⟨ l ⟩U A
+U-elim _ (Uᵣ ⊩U) = noemb ⊩U
+U-elim A⇒U (ℕᵣ D) with whrDet* (A⇒U , Uₙ) (red D , ℕₙ)
+... | ()
 -- U-elim (Emptyᵣ D) with whnfRed* (red D) Uₙ
 -- ... | ()
 -- U-elim (Unitᵣ (Unitₜ D _)) with whnfRed* (red D) Uₙ
 -- ... | ()
--- U-elim (ne′ K D neK K≡K) =
+-- U-elim (ne′ l l< K D neK K≡K) =
 --   ⊥-elim (U≢ne neK (whnfRed* (red D) Uₙ))
 -- U-elim (Bᵣ′ W _ _ D _ _ _ _ _ _ _) =
 --   ⊥-elim (U≢B W (whnfRed* (red D) Uₙ))
 -- U-elim (Idᵣ ⊩A) =
 --   case whnfRed* (red (_⊩ₗId_.⇒*Id ⊩A)) Uₙ of λ ()
--- U-elim (emb 0<1 x) with U-elim x
+-- U-elim (emb 0<1 x) = U-elim {!x!}
+--   where
 -- U-elim (emb 0<1 x) | noemb x₁ = emb 0<1 (noemb x₁)
 -- U-elim (emb 0<1 x) | emb () x₁
 
