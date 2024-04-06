@@ -1,4 +1,3 @@
-{-# OPTIONS --allow-unsolved-metas #-}
 ------------------------------------------------------------------------
 -- ShapeView: A view for constructor equality for the logical relation
 ------------------------------------------------------------------------
@@ -293,9 +292,9 @@ data ShapeView (Γ : Con Term n) : ∀ l l′ A B (p : Γ ⊩⟨ l ⟩ A) (q : �
   Bᵥ : ∀ {A B l l′} W BA BB
     → ShapeView Γ l l′ A B (Bᵣ W BA) (Bᵣ W BB)
   Idᵥ : ∀ ⊩A ⊩B → ShapeView Γ l l′ A B (Idᵣ ⊩A) (Idᵣ ⊩B)
-  embl- : ∀ {A B l l′′ l′ p q} (l< : l′′ < l)
-        → ShapeView Γ l′′ l′ A B p q
-        → ShapeView Γ l l′ A B (emb-⊩ l< p) q
+  embl- : ∀ {A B l l′′ l′ q} (l< : l′′ < l) {p}
+        → ShapeView Γ l′′ l′ A B {! p!} q
+        → ShapeView Γ l l′ A B (emb l< p) q
   emb-l : ∀ {A B l l′′ l′ p q} (l< : l′′ < l′)
         → ShapeView Γ l l′′ A B p q
         → ShapeView Γ l l′ A B p (emb-⊩ l< q)
