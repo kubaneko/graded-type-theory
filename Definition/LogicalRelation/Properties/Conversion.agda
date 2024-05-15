@@ -28,7 +28,7 @@ open import Definition.LogicalRelation.ShapeView R
 open import Definition.LogicalRelation.Irrelevance R
 
 open import Tools.Function
-open import Tools.Nat
+open import Tools.Nat hiding (_<_)
 open import Tools.Product
 import Tools.PropositionalEquality as PE
 
@@ -37,6 +37,22 @@ private
     n : Nat
     p q : M
     Γ : Con Term n
+
+-- Conversion of syntactic reduction closures.
+convRed:*: : ∀ {t u A B} → Γ ⊢ t :⇒*: u ∷ A → Γ ⊢ A ≡ B → Γ ⊢ t :⇒*: u ∷ B
+convRed:*: [ ⊢t , ⊢u , d ] A≡B = [ conv ⊢t  A≡B , conv ⊢u  A≡B , conv* d  A≡B ]
+
+helper : {Γ : Con Term n} {t : Term n} {l l' l'' : TypeLevel} (p : l < l') → (q : l < l'') → LogRelKit._⊩_ (kit-helper p) Γ t → LogRelKit._⊩_ (kit-helper q) Γ t
+helper ≤′-refl ≤′-refl t = t
+helper p (≤′-step q) t = helper p q t
+helper (≤′-step p) q t = helper p q t
+
+helperEq : {Γ : Con Term n} {t u : Term n} {l l' l'' : TypeLevel} (p : l < l') → (q : l < l'') ([t] : LogRelKit._⊩_ (kit-helper p) Γ t)
+                                    → LogRelKit._⊩_≡_/_ (kit-helper p) Γ t u [t] → LogRelKit._⊩_≡_/_ (kit-helper q) Γ t u (helper p q [t])
+helperEq ≤′-refl ≤′-refl [t] eq = eq
+helperEq (≤′-step p) ≤′-refl [t] eq = helperEq p ≤′-refl [t] eq
+helperEq ≤′-refl (≤′-step q) [t] eq = helperEq ≤′-refl q [t] eq
+helperEq (≤′-step p) (≤′-step q) [t] eq = helperEq (≤′-step p) q [t] eq
 
 mutual
   -- Helper function for conversion of terms converting from left to right.
@@ -143,7 +159,9 @@ mutual
             (≅-eq A≡B)
     in  Σₜ f (convRed:*: d ΣFG≡ΣF₁G₁) (≅-conv f≡f ΣFG≡ΣF₁G₁)
            (ne x) (~-conv f~f ΣFG≡ΣF₁G₁)
-  convTermT₁ (Uᵥ (Uᵣ .⁰ 0<1 ⊢Γ) (Uᵣ .⁰ 0<1 ⊢Γ₁)) A≡B t = t
+  convTermT₁ (Uᵥ (Uᵣ l1 l<1 D1) (Uᵣ l2 l<2 D2)) D (Uₜ A d typeA A≡A [t]) with whrDet* (red D2 , Uₙ) (red D , Uₙ)
+  convTermT₁ (Uᵥ (Uᵣ l1 l<1 D1) (Uᵣ l2 l<2 D2)) D (Uₜ A d typeA A≡A [t])
+        | PE.refl = Uₜ A (convRed:*: d (refl (_⊢_:⇒*:_.⊢B D))) typeA A≡A (helper l<1 l<2 [t])
   convTermT₁ (Idᵥ ⊩A ⊩B) A≡B ⊩t@(_ , t⇒*u , _) =
     case whrDet* (red (_⊩ₗId_.⇒*Id ⊩B) , Idₙ) (red ⇒*Id′ , Idₙ) of λ {
       PE.refl →
@@ -159,8 +177,10 @@ mutual
                (lhs≡rhs→lhs′≡rhs′ lhs≡rhs)) }}
     where
     open _⊩ₗId_≡_/_ A≡B
-  convTermT₁ (emb⁰¹ x) A≡B t = convTermT₁ x A≡B t
-  convTermT₁ (emb¹⁰ x) A≡B t = convTermT₁ x A≡B t
+  convTermT₁ (emb-l ≤′-refl (refl-emb _) x) A≡B t = convTermT₁ x A≡B t
+  convTermT₁ (emb-l (≤′-step l<) (step-emb _ _ e) x) A≡B t = convTermT₁ (emb-l l< e x) A≡B t
+  convTermT₁ (embl- ≤′-refl (refl-emb _) x) A≡B t = convTermT₁ x A≡B t
+  convTermT₁ (embl- (≤′-step l<) (step-emb _ _ e) x) A≡B t = convTermT₁ (embl- l< e x) A≡B t
 
   -- Helper function for conversion of terms converting from right to left.
   convTermT₂ : ∀ {l l′ A B t} {[A] : Γ ⊩⟨ l ⟩ A} {[B] : Γ ⊩⟨ l′ ⟩ B}
@@ -267,7 +287,9 @@ mutual
             (≅-eq A≡B)
     in  Σₜ f (convRed:*: d (sym ΣFG≡ΣF₁G₁)) (≅-conv f≡f (sym ΣFG≡ΣF₁G₁))
            (ne x) (~-conv f~f (sym ΣFG≡ΣF₁G₁))
-  convTermT₂ (Uᵥ (Uᵣ .⁰ 0<1 ⊢Γ) (Uᵣ .⁰ 0<1 ⊢Γ₁)) A≡B t = t
+  convTermT₂ (Uᵥ (Uᵣ l1 l<1 D1) (Uᵣ l2 l<2 D2)) D (Uₜ A d typeA A≡A [t]) with whrDet* (red D2 , Uₙ) (red D , Uₙ)
+  convTermT₂ (Uᵥ (Uᵣ l1 l<1 D1) (Uᵣ l2 l<2 D2)) D (Uₜ A d typeA A≡A [t])
+        | PE.refl = Uₜ A (convRed:*: d (refl (_⊢_:⇒*:_.⊢B D))) typeA A≡A (helper l<2 l<1 [t])
   convTermT₂ (Idᵥ ⊩A ⊩B) A≡B ⊩t@(_ , t⇒*u , _) =
     case whrDet* (red (_⊩ₗId_.⇒*Id ⊩B) , Idₙ) (red ⇒*Id′ , Idₙ) of λ {
       PE.refl →
@@ -284,8 +306,10 @@ mutual
                   lhs≡rhs)) }}
     where
     open _⊩ₗId_≡_/_ A≡B
-  convTermT₂ (emb⁰¹ x) A≡B t = convTermT₂ x A≡B t
-  convTermT₂ (emb¹⁰ x) A≡B t = convTermT₂ x A≡B t
+  convTermT₂ (emb-l ≤′-refl (refl-emb _) x) A≡B t = convTermT₂ x A≡B t
+  convTermT₂ (emb-l (≤′-step l<) (step-emb _ _ e) x) A≡B t = convTermT₂ (emb-l l< e x) A≡B t
+  convTermT₂ (embl- ≤′-refl (refl-emb _) x) A≡B t = convTermT₂ x A≡B t
+  convTermT₂ (embl- (≤′-step l<) (step-emb _ _ e) x) A≡B t = convTermT₂ (embl- l< e x) A≡B t
 
   -- Conversion of terms converting from left to right.
   convTerm₁ : ∀ {A B t l l′} ([A] : Γ ⊩⟨ l ⟩ A) ([B] : Γ ⊩⟨ l′ ⟩ B)
@@ -443,7 +467,9 @@ mutual
             (ne x) (ne y) (≅-conv p≅r ΣFG≡ΣF₁G₁)
             (convTerm₁ [A] [B] [A≡B] [t]) (convTerm₁ [A] [B] [A≡B] [u])
             p~r₁
-  convEqTermT₁ (Uᵥ (Uᵣ .⁰ 0<1 ⊢Γ) (Uᵣ .⁰ 0<1 ⊢Γ₁)) A≡B t≡u = t≡u
+  convEqTermT₁ (Uᵥ (Uᵣ l1 l<1 D1) (Uᵣ l2 l<2 D2)) D eq with whrDet* (red D2 , Uₙ) (red D , Uₙ)
+  convEqTermT₁ (Uᵥ (Uᵣ l1 l<1 D1) (Uᵣ l2 l<2 D2)) D (Uₜ₌ A B d d′ typeA typeB A≡B [t] [u] [t≡u]) | PE.refl
+    = Uₜ₌ A B d d′ typeA typeB A≡B (helper l<1 l<2 [t]) (helper l<1 l<2 [u]) (helperEq l<1 l<2 [t] [t≡u])
   convEqTermT₁ (Idᵥ ⊩A ⊩B) A≡B t≡u@(_ , _ , t⇒*t′ , u⇒*u′ , _) =
     case whrDet* (red (_⊩ₗId_.⇒*Id ⊩B) , Idₙ) (red ⇒*Id′ , Idₙ) of λ {
       PE.refl →
@@ -461,8 +487,10 @@ mutual
                (lhs≡rhs→lhs′≡rhs′ lhs≡rhs)) }}
     where
     open _⊩ₗId_≡_/_ A≡B
-  convEqTermT₁ (emb⁰¹ x) A≡B t≡u = convEqTermT₁ x A≡B t≡u
-  convEqTermT₁ (emb¹⁰ x) A≡B t≡u = convEqTermT₁ x A≡B t≡u
+  convEqTermT₁ (emb-l ≤′-refl (refl-emb _) x) A≡B t = convEqTermT₁ x A≡B t
+  convEqTermT₁ (emb-l (≤′-step l<) (step-emb _ _ e) x) A≡B t = convEqTermT₁ (emb-l l< e x) A≡B t
+  convEqTermT₁ (embl- ≤′-refl (refl-emb _) x) A≡B t = convEqTermT₁ x A≡B t
+  convEqTermT₁ (embl- (≤′-step l<) (step-emb _ _ e) x) A≡B t = convEqTermT₁ (embl- l< e x) A≡B t
 
   -- Helper function for conversion of term equality converting from right to left.
   convEqTermT₂ : ∀ {l l′ A B t u} {[A] : Γ ⊩⟨ l ⟩ A} {[B] : Γ ⊩⟨ l′ ⟩ B}
@@ -592,7 +620,9 @@ mutual
             (ne x) (ne y) (≅-conv t≡u (sym ΣFG≡ΣF₁G₁))
             (convTerm₂ [A] [B] [A≡B] [t]) (convTerm₂ [A] [B] [A≡B] [u])
             p~r
-  convEqTermT₂ (Uᵥ (Uᵣ .⁰ 0<1 ⊢Γ) (Uᵣ .⁰ 0<1 ⊢Γ₁)) A≡B t≡u = t≡u
+  convEqTermT₂ (Uᵥ (Uᵣ l1 l<1 D1) (Uᵣ l2 l<2 D2)) D eq with whrDet* (red D2 , Uₙ) (red D , Uₙ)
+  convEqTermT₂ (Uᵥ (Uᵣ l1 l<1 D1) (Uᵣ l2 l<2 D2)) D (Uₜ₌ A B d d′ typeA typeB A≡B [t] [u] [t≡u]) | PE.refl
+    = Uₜ₌ A B d d′ typeA typeB A≡B (helper l<2 l<1 [t]) (helper l<2 l<1 [u]) (helperEq l<2 l<1 [t] [t≡u])
   convEqTermT₂ (Idᵥ ⊩A ⊩B) A≡B t≡u@(_ , _ , t⇒*t′ , u⇒*u′ , _) =
     case whrDet* (red (_⊩ₗId_.⇒*Id ⊩B) , Idₙ) (red ⇒*Id′ , Idₙ) of λ {
       PE.refl →
@@ -611,8 +641,10 @@ mutual
                   lhs≡rhs)) }}
     where
     open _⊩ₗId_≡_/_ A≡B
-  convEqTermT₂ (emb⁰¹ x) A≡B t≡u = convEqTermT₂ x A≡B t≡u
-  convEqTermT₂ (emb¹⁰ x) A≡B t≡u = convEqTermT₂ x A≡B t≡u
+  convEqTermT₂ (emb-l ≤′-refl (refl-emb _) x) A≡B t = convEqTermT₂ x A≡B t
+  convEqTermT₂ (emb-l (≤′-step l<) (step-emb _ _ e) x) A≡B t = convEqTermT₂ (emb-l l< e x) A≡B t
+  convEqTermT₂ (embl- ≤′-refl (refl-emb _) x) A≡B t = convEqTermT₂ x A≡B t
+  convEqTermT₂ (embl- (≤′-step l<) (step-emb _ _ e) x) A≡B t = convEqTermT₂ (embl- l< e x) A≡B t
 
   -- Conversion of term equality converting from left to right.
   convEqTerm₁ : ∀ {l l′ A B t u} ([A] : Γ ⊩⟨ l ⟩ A) ([B] : Γ ⊩⟨ l′ ⟩ B)

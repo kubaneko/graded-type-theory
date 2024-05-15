@@ -23,6 +23,8 @@ open import Definition.Typed.Properties R
 import Definition.Typed.Weakening R as Wk
 open import Definition.Typed.RedSteps R
 open import Definition.LogicalRelation R
+open import Definition.LogicalRelation.Irrelevance R
+open import Definition.LogicalRelation.Properties.Cumulativity R
 open import Definition.LogicalRelation.Properties.Reflexivity R
 open import Definition.LogicalRelation.Properties.Universe R
 open import Definition.LogicalRelation.Properties.Escape R
@@ -48,8 +50,9 @@ redSubst* : ∀ {A B : Term n} {l}
           → Γ ⊩⟨ l ⟩ B
           → ∃ λ ([A] : Γ ⊩⟨ l ⟩ A)
           → Γ ⊩⟨ l ⟩ A ≡ B / [A]
-redSubst* D (Uᵣ′ l′ l< ⊢Γ) rewrite redU* D =
-  Uᵣ′ l′ l< ⊢Γ , PE.refl
+redSubst* D (Uᵣ′ l′ l< [ ⊢A₁ , ⊢B , D′ ]) =
+  let ⊢A = redFirst* D
+  in Uᵣ′ l′ l< ([ ⊢A , ⊢B , D ⇨* D′ ])  , [ ⊢A₁ , ⊢B , D′ ]
 redSubst* D (ℕᵣ [ ⊢B , ⊢ℕ , D′ ]) =
   let ⊢A = redFirst* D
   in  ℕᵣ ([ ⊢A , ⊢ℕ , D ⇨* D′ ]) , D′
@@ -80,8 +83,11 @@ redSubst* A⇒*B (Idᵣ ⊩B) =
   , Id₌′ ⇒*Id (reflEq ⊩Ty) (reflEqTerm ⊩Ty ⊩lhs) (reflEqTerm ⊩Ty ⊩rhs) }
   where
   open _⊩ₗId_ ⊩B
-redSubst* D (emb 0<1 x) with redSubst* D x
-redSubst* D (emb 0<1 x) | y , y₁ = emb 0<1 y , y₁
+redSubst* D (emb ≤′-refl x) with redSubst* D x
+redSubst* D (emb ≤′-refl x) | y , y₁ = emb ≤′-refl y , y₁
+redSubst* D (emb (≤′-step l<) x) =
+  let y , p = redSubst* D (emb l< x)
+  in cumul ≤′-refl y , cumulEq ≤′-refl y p
 
 -- Weak head expansion of reducible terms.
 redSubst*Term : ∀ {A : Term n} {t u l}
@@ -90,12 +96,20 @@ redSubst*Term : ∀ {A : Term n} {t u l}
               → Γ ⊩⟨ l ⟩ u ∷ A / [A]
               → Γ ⊩⟨ l ⟩ t ∷ A / [A]
               × Γ ⊩⟨ l ⟩ t ≡ u ∷ A / [A]
-redSubst*Term t⇒u (Uᵣ′ .⁰ 0<1 ⊢Γ) (Uₜ A [ ⊢t , ⊢u , d ] typeA A≡A [u]) =
-  let [d]  = [ ⊢t , ⊢u , d ]
-      [d′] = [ redFirst*Term t⇒u , ⊢u , t⇒u ⇨∷* d ]
-      q = redSubst* (univ* t⇒u) (univEq (Uᵣ′ ⁰ 0<1 ⊢Γ) (Uₜ A [d] typeA A≡A [u]))
-  in Uₜ A [d′] typeA A≡A (proj₁ q)
-  ,  Uₜ₌ A A [d′] [d] typeA typeA A≡A (proj₁ q) [u] (proj₂ q)
+redSubst*Term t⇒u (Uᵣ′ l ≤′-refl D) (Uₜ A [ ⊢t , ⊢u , d ] typeA A≡A [u]) =
+  let A≡K  = subset* (red D)
+      [d]  = [ ⊢t , ⊢u , d ]
+      [d′] = [ conv (redFirst*Term t⇒u) A≡K , ⊢u , conv* t⇒u A≡K ⇨∷* d ]
+      q = redSubst* (univ* (conv* t⇒u A≡K))
+        (univEq (Uᵣ′ l ≤′-refl ([ _⊢_:⇒*:_.⊢B D , (_⊢_:⇒*:_.⊢B D) , id (_⊢_:⇒*:_.⊢B D) ]))
+        (Uₜ A [d] typeA A≡A [u]))
+  in Uₜ A [d′] typeA A≡A (proj₁ q) ,
+  Uₜ₌ A A [d′] [d] typeA typeA A≡A (proj₁ q) [u] (proj₂ q)
+redSubst*Term t⇒u ⊩U@(Uᵣ′ l (≤′-step l<) D) (Uₜ A D′ typeA A≡A [u]) =
+  let Un = Uᵣ′ l l< D
+      y , eq = redSubst*Term t⇒u Un (Uₜ A D′ typeA A≡A [u])
+      y′ = irrelevanceTerm Un ⊩U y
+  in y′ , irrelevanceEqTerm Un ⊩U eq
 redSubst*Term t⇒u (ℕᵣ D) (ℕₜ n [ ⊢u , ⊢n , d ] n≡n prop) =
   let A≡ℕ  = subset* (red D)
       ⊢t   = conv (redFirst*Term t⇒u) A≡ℕ
@@ -194,7 +208,8 @@ redSubst*Term
          (rflᵣ _)     → _) }
   where
   open _⊩ₗId_ ⊩A
-redSubst*Term t⇒u (emb 0<1 x) [u] = redSubst*Term t⇒u x [u]
+redSubst*Term t⇒u (emb ≤′-refl x) [u] = redSubst*Term t⇒u x [u]
+redSubst*Term t⇒u (emb (≤′-step l<) x) [u] = redSubst*Term t⇒u (emb l< x) [u]
 
 -- Weak head expansion of reducible types with single reduction step.
 redSubst : ∀ {A B : Term n} {l}

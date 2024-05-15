@@ -32,7 +32,7 @@ open import Tools.Sum using (_⊎_; inj₁; inj₂)
 
 private
   variable
-    n : Nat
+    n l l₁ l₂ : Nat
     Γ : Con Term n
     A A′ B B′ C D E F U′ : Term n
     a b t t′ u u′ v w : Term n

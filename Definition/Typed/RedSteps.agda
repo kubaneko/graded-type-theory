@@ -28,7 +28,7 @@ open import Tools.Nat
 
 private
   variable
-    n : Nat
+    n l : Nat
     Γ : Con Term n
     A B C : Term n
     a t t₁ t₂ t′ u v v₁ v₂ r : Term n
@@ -63,7 +63,7 @@ convRed:*: : ∀ {t u A B} → Γ ⊢ t :⇒*: u ∷ A → Γ ⊢ A ≡ B → Γ
 convRed:*: [ ⊢t , ⊢u , d ] A≡B = [ conv ⊢t  A≡B , conv ⊢u  A≡B , conv* d  A≡B ]
 
 -- Universe of reduction closures
-univ* : Γ ⊢ A ⇒* B ∷ U → Γ ⊢ A ⇒* B
+univ* : Γ ⊢ A ⇒* B ∷ U l → Γ ⊢ A ⇒* B
 univ* (id x) = id (univ x)
 univ* (x ⇨ A⇒B) = univ x ⇨ univ* A⇒B
 

@@ -15,8 +15,9 @@ module Definition.LogicalRelation.Properties.MaybeEmb
 
 open EqRelSet {{...}}
 
-open import Definition.Untyped M
+open import Definition.Untyped M hiding (_∷_)
 open import Definition.LogicalRelation R
+open import Definition.LogicalRelation.Properties.Universe R
 
 open import Tools.Nat using (Nat)
 
@@ -65,16 +66,9 @@ opaque
 ------------------------------------------------------------------------
 -- Embedding lemmas
 
--- Any level can be embedded into the highest level.
-maybeEmb : ∀ {l A}
-         → Γ ⊩⟨ l ⟩ A
-         → Γ ⊩⟨ ¹ ⟩ A
-maybeEmb {l = ⁰} [A] = emb 0<1 [A]
-maybeEmb {l = ¹} [A] = [A]
-
 -- The lowest level can be embedded in any level.
 maybeEmb′ : ∀ {l A}
-          → Γ ⊩⟨ ⁰ ⟩ A
+          → Γ ⊩⟨ 0 ⟩ A
           → Γ ⊩⟨ l ⟩ A
 maybeEmb′ {l = ⁰} [A] = [A]
 maybeEmb′ {l = ¹} [A] = emb 0<1 [A]

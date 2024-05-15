@@ -79,6 +79,7 @@ import Definition.LogicalRelation.Properties.Escape
 import Definition.LogicalRelation.ShapeView
 import Definition.LogicalRelation.Irrelevance
 import Definition.LogicalRelation.Properties.Conversion
+import Definition.LogicalRelation.Properties.Cumulativity
 import Definition.LogicalRelation.Properties.MaybeEmb
 import Definition.LogicalRelation.Properties.Symmetry
 import Definition.LogicalRelation.Properties.Neutral
@@ -92,6 +93,7 @@ import Definition.LogicalRelation.Weakening
 import Definition.LogicalRelation.Substitution
 import Definition.LogicalRelation.Substitution.Irrelevance
 import Definition.LogicalRelation.Substitution.Conversion
+import Definition.LogicalRelation.Substitution.Cumulativity
 import Definition.LogicalRelation.Substitution.Reduction
 import Definition.LogicalRelation.Substitution.Reflexivity
 import Definition.LogicalRelation.Substitution.Weakening

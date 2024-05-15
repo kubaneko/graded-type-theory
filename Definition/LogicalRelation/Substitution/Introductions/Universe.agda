@@ -18,7 +18,7 @@ open Type-restrictions R
 
 open import Definition.Typed R
 open import Definition.Typed.Properties R
-open import Definition.Untyped M
+open import Definition.Untyped M hiding (_∷_)
 open import Definition.Untyped.Neutral M type-variant
 open import Definition.LogicalRelation R
 open import Definition.LogicalRelation.Hidden R
@@ -323,24 +323,24 @@ opaque
 -- Non-opaque validity lemmas
 
 -- Validity of the universe type.
-Uᵛ : ([Γ] : ⊩ᵛ Γ) → Γ ⊩ᵛ⟨ ¹ ⟩ U / [Γ]
-Uᵛ [Γ] = wrap λ ⊢Δ [σ] → Uᵣ′ ⁰ 0<1 ⊢Δ , λ _ x₂ → PE.refl
+Uᵛ : ([Γ] : ⊩ᵛ Γ) → Γ ⊩ᵛ⟨ 1+ l ⟩ U l / [Γ]
+Uᵛ {l = l} [Γ] = wrap λ ⊢Δ [σ] → Uᵣ′ l  ≤′-refl ([ Uⱼ ⊢Δ , Uⱼ ⊢Δ , id (Uⱼ ⊢Δ) ]) , λ x₁ x₂ → [ (Uⱼ ⊢Δ) , (Uⱼ ⊢Δ) , (id (Uⱼ ⊢Δ)) ]
 
 -- Valid terms of type U are valid types.
 univᵛ : ∀ {A l l′} ([Γ] : ⊩ᵛ Γ)
-        ([U] : Γ ⊩ᵛ⟨ l ⟩ U / [Γ])
-      → Γ ⊩ᵛ⟨ l ⟩ A ∷ U / [Γ] / [U]
+        ([U] : Γ ⊩ᵛ⟨ l ⟩ U l′ / [Γ])
+      → Γ ⊩ᵛ⟨ l ⟩ A ∷ U l′ / [Γ] / [U]
       → Γ ⊩ᵛ⟨ l′ ⟩ A / [Γ]
 univᵛ {l′ = l′} [Γ] [U] [A] = wrap λ ⊢Δ [σ] →
-  let [A]₁ = maybeEmb′ {l = l′} (univEq (proj₁ (unwrap [U] ⊢Δ [σ])) (proj₁ ([A] ⊢Δ [σ])))
+      let [A]₁ = univEq (proj₁ (unwrap [U] ⊢Δ [σ])) (proj₁ ([A] ⊢Δ [σ]))
   in  [A]₁ , (λ [σ′] [σ≡σ′] → univEqEq (proj₁ (unwrap [U] ⊢Δ [σ])) [A]₁
                                        ((proj₂ ([A] ⊢Δ [σ])) [σ′] [σ≡σ′]))
 
 -- Valid term equality of type U is valid type equality.
-univEqᵛ : ∀ {A B l l′} ([Γ] : ⊩ᵛ Γ)
-          ([U] : Γ ⊩ᵛ⟨ l′ ⟩ U / [Γ])
+univEqᵛ : ∀ {A B l l′ l″} ([Γ] : ⊩ᵛ Γ)
+          ([U] : Γ ⊩ᵛ⟨ l′ ⟩ U l″ / [Γ])
           ([A] : Γ ⊩ᵛ⟨ l ⟩ A / [Γ])
-        → Γ ⊩ᵛ⟨ l′ ⟩ A ≡ B ∷ U / [Γ] / [U]
+        → Γ ⊩ᵛ⟨ l′ ⟩ A ≡ B ∷ U l″ / [Γ] / [U]
         → Γ ⊩ᵛ⟨ l ⟩ A ≡ B / [Γ] / [A]
 univEqᵛ {A} [Γ] [U] [A] [t≡u] ⊢Δ [σ] =
   univEqEq (proj₁ (unwrap [U] ⊢Δ [σ])) (proj₁ (unwrap [A] ⊢Δ [σ])) ([t≡u] ⊢Δ [σ])

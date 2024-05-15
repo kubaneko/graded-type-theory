@@ -37,7 +37,7 @@ infix 10 _⊢_[conv↓]_∷_
 
 private
   variable
-    n : Nat
+    n l₁ : Nat
     Γ : Con Term n
     A₁ A₂ B₁ B₂ C F H G E : Term n
     a₀ b₀ g h k l t t₁ t₂ u u₁ u₂ v v₁ v₂ w₁ w₂ : Term n
@@ -141,7 +141,7 @@ mutual
   -- Type equality with types in WHNF.
   data _⊢_[conv↓]_ (Γ : Con Term n) : (A B : Term n) → Set a where
 
-    U-refl     : ⊢ Γ → Γ ⊢ U [conv↓] U
+    U-refl     : ⊢ Γ → Γ ⊢ U l₁ [conv↓] U l₁
 
     ℕ-refl     : ⊢ Γ → Γ ⊢ ℕ [conv↓] ℕ
 
@@ -150,7 +150,7 @@ mutual
     Unit-refl  : ⊢ Γ → Unit-allowed s → Γ ⊢ Unit s [conv↓] Unit s
 
     ne         : ∀ {K L}
-               → Γ ⊢ K ~ L ↓ U
+               → Γ ⊢ K ~ L ↓ U l₁
                → Γ ⊢ K [conv↓] L
 
     ΠΣ-cong    : ∀ {F G H E}
@@ -204,10 +204,10 @@ mutual
               → Γ ⊢ k [conv↓] l ∷ N
 
     univ      : ∀ {A B}
-              → Γ ⊢ A ∷ U
-              → Γ ⊢ B ∷ U
+              → Γ ⊢ A ∷ U l₁
+              → Γ ⊢ B ∷ U l₁
               → Γ ⊢ A [conv↓] B
-              → Γ ⊢ A [conv↓] B ∷ U
+              → Γ ⊢ A [conv↓] B ∷ U l₁
 
     zero-refl : ⊢ Γ → Γ ⊢ zero [conv↓] zero ∷ ℕ
 

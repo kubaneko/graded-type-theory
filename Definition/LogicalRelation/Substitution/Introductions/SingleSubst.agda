@@ -200,7 +200,8 @@ substSΠ₁′
       ⊢Γ = wf (escape [F]₁)
       [t]′ = irrelevanceTerm′ Feq [F]₁ ([F] id ⊢Γ) [t]
   in  irrelevance′ Geq ([G] id ⊢Γ [t]′)
-substSΠ₁′ W (emb 0<1 x) [F]₁ [t] = emb 0<1 (substSΠ₁′ W x [F]₁ [t])
+substSΠ₁′ W (emb ≤′-refl x) [F]₁ [t] = emb ≤′-refl (substSΠ₁′ W x [F]₁ [t])
+substSΠ₁′ W (emb (≤′-step s) x) [F]₁ [t] = cumulStep (substSΠ₁′ W (emb s x) [F]₁ [t])
 
 -- Reducible substitution of Π-types.
 substSΠ₁ : ∀ {F G t l l′} W
@@ -240,7 +241,8 @@ substSΠ₂′ W (noemb (Bᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext _))
   in  irrelevanceEq′ Geq ([G] id ⊢Γ [t]′) [G[t]]
         (transEq′ PE.refl Geq′ ([G] id ⊢Γ [t]′) ([G] id ⊢Γ [t′]′)
                   [G′[t′]] [Gt≡Gt′] [Gt′≡G′t′])
-substSΠ₂′ W (emb 0<1 x) = substSΠ₂′ W x
+substSΠ₂′ W (emb ≤′-refl x) = substSΠ₂′ W x
+substSΠ₂′ W (emb (≤′-step s) x) = substSΠ₂′ W (emb s x)
 
 -- Reducible substitution of Π-congruence.
 substSΠ₂ : ∀ {F F′ G G′ t t′ l l′ l″ l‴} W
