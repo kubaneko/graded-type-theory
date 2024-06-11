@@ -1446,16 +1446,6 @@ private opaque
   emb-⊩∷-lemma PE.refl ⊩t = ⊩t
 
 opaque
-
-  -- Embedding for _⊩⟨_⟩_.
-
-  emb-⊩ :
-    l ≤ l′ →
-    Γ ⊩⟨ l ⟩ A →
-    Γ ⊩⟨ l′ ⟩ A
-  emb-⊩ = emb-≤-⊩
-
-opaque
   unfolding _⊩⟨_⟩_∷_
 
   -- Embedding for _⊩⟨_⟩_∷_.

@@ -139,28 +139,12 @@ opaque
     ⊩ᵛ∷⇔ .proj₂
       ( ⊩ᵛU ⊩Γ
       -- TODO works?
-      -- , λ σ₁≡σ₂ →
-      --     case escape-⊩ˢ≡∷ σ₁≡σ₂ of λ
-      --       (⊢Δ , _) →
-      --     case Emptyⱼ ⊢Δ of λ
-      --       ⊢Empty →
-      --     Type→⊩≡∷U⇔ Emptyₙ Emptyₙ .proj₂
-      --       ( ⊢Empty , ⊢Empty , ≅ₜ-Emptyrefl ⊢Δ
-      --       , (_ , 0<1 , refl-⊩≡ (⊩Empty ⊢Δ))
-      --       )
-        , λ ⊩σ →
-            case escape-⊩ˢ∷ ⊩σ .proj₁ of λ
-              ⊢Δ →
-            case ⊩Empty ⊢Δ of λ
-              ⊩Empty′ →
-            case Emptyⱼ ⊢Δ  of λ
-              ⊢Empty →
-            case ≅ₜ-Emptyrefl ⊢Δ of λ
-              Empty≅Empty →
-              Type→⊩∷U⇔ Emptyₙ .proj₂
-                (≤′-refl ,  ⊩Empty′ 
-                , (⊢Empty , Empty≅Empty))
-            , λ _ → Type→⊩≡∷U⇔ Emptyₙ Emptyₙ .proj₂
-                  (≤′-refl , refl-⊩≡ ⊩Empty′ ,
-                  ⊢Empty , ⊢Empty , Empty≅Empty)
+      , λ σ₁≡σ₂ →
+          case escape-⊩ˢ≡∷ σ₁≡σ₂ of λ
+            (⊢Δ , _) →
+          case Emptyⱼ ⊢Δ  of λ
+            ⊢Empty →
+          Type→⊩≡∷U⇔ Emptyₙ Emptyₙ .proj₂
+            (≤′-refl , refl-⊩≡ (⊩Empty ⊢Δ) ,
+            ⊢Empty , ⊢Empty , ≅ₜ-Emptyrefl ⊢Δ)
       )

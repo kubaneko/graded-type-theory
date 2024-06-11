@@ -314,46 +314,42 @@ opaque
 
   -- Validity of U.
 
-  -- TODO work
-  -- ⊩ᵛU : ⊩ᵛ Γ → Γ ⊩ᵛ⟨ ¹ ⟩ U
-  -- ⊩ᵛU {Γ} ⊩Γ =
-  --   ⊩ᵛ⇔ .proj₂
-  --     ( ⊩Γ
-  --     , λ {_} {Δ = Δ} {σ₁ = σ₁} {σ₂ = σ₂} →
-  --         Δ ⊩ˢ σ₁ ≡ σ₂ ∷ Γ                  →⟨ proj₁ ∘→ escape-⊩ˢ≡∷ ⟩
-  --         ⊢ Δ                               →⟨ (λ ⊢Δ → (_ , 0<1) , ⊢Δ , PE.refl) ⟩
-  --         (∃ λ l → l < ¹) × ⊢ Δ × U PE.≡ U  ⇔˘⟨ ⊩U≡⇔ ⟩→
-  --         Δ ⊩⟨ ¹ ⟩ U ≡ U                    □
-  --     )
   ⊩ᵛU : ⊩ᵛ Γ → Γ ⊩ᵛ⟨ 1+ l ⟩ U l
-  ⊩ᵛU ⊩Γ =
-    ⊩ᵛ⇔ .proj₂ (⊩Γ , (λ ⊩σ → case escape-⊩ˢ∷ ⊩σ of λ
-                            (⊢Δ , _) → ⊩U⇔ .proj₂ (≤′-refl , ⊢Δ) ,
-                            (λ _ → ⊩U≡⇔ .proj₂ (≤′-refl , ⊢Δ , idRed:*: (Uⱼ ⊢Δ)
-                            , ⊩U⇔ .proj₂ (≤′-refl , ⊢Δ)))))
+  ⊩ᵛU {Γ} {l = l} ⊩Γ =
+    ⊩ᵛ⇔ .proj₂ (⊩Γ , λ {_} {Δ = Δ} {σ₁ = σ₁} {σ₂ = σ₂}  →
+    Δ ⊩ˢ σ₁ ≡ σ₂ ∷ Γ                                      →⟨ proj₁ ∘→ escape-⊩ˢ≡∷ ⟩
+    ⊢ Δ                                                   →⟨ (λ ⊢Δ → ≤′-refl , ⊢Δ , idRed:*: (Uⱼ ⊢Δ)
+                                                                      , ⊩U⇔ .proj₂ (≤′-refl , ⊢Δ)) ⟩
+    (l < 1+ l × ⊢ Δ × Δ ⊢ U l :⇒*: U l × Δ ⊩⟨ 1+ l ⟩ U l) ⇔˘⟨ ⊩U≡⇔  ⟩→
+    Δ ⊩⟨ 1+ l ⟩ U l ≡ U l                                 □
+    )
 
 opaque
 
   -- Validity of U.
 
   ⊩ᵛU< : ⊩ᵛ Γ → l < l′ → Γ ⊩ᵛ⟨ l′ ⟩ U l
-  ⊩ᵛU< ⊩Γ l< =
-    ⊩ᵛ⇔ .proj₂ (⊩Γ , (λ ⊩σ → case escape-⊩ˢ∷ ⊩σ of λ
-                            (⊢Δ , _) → ⊩U⇔ .proj₂ (l< , ⊢Δ) ,
-                            (λ _ → ⊩U≡⇔ .proj₂ (l< , ⊢Δ , idRed:*: (Uⱼ ⊢Δ)
-                            , ⊩U⇔ .proj₂ (l< , ⊢Δ)))))
+  ⊩ᵛU< {Γ} {l = l} {l′ = l′} ⊩Γ l< =
+    ⊩ᵛ⇔ .proj₂ (⊩Γ , λ {_} {Δ = Δ} {σ₁ = σ₁} {σ₂ = σ₂}  →
+    Δ ⊩ˢ σ₁ ≡ σ₂ ∷ Γ                                      →⟨ proj₁ ∘→ escape-⊩ˢ≡∷ ⟩
+    ⊢ Δ                                                   →⟨ (λ ⊢Δ → l< , ⊢Δ , idRed:*: (Uⱼ ⊢Δ)
+                                                                      , ⊩U⇔ .proj₂ (l< , ⊢Δ)) ⟩
+    (l < l′ × ⊢ Δ × Δ ⊢ U l :⇒*: U l × Δ ⊩⟨ l′ ⟩ U l)     ⇔˘⟨ ⊩U≡⇔  ⟩→
+    Δ ⊩⟨ l′ ⟩ U l ≡ U l                                   □
+    )
 
-opaque
-  univInUniv : (1+ l < l′) → ([U] : Γ ⊩ᵛ⟨ l′ ⟩ U (1+ l)) → Γ ⊩ᵛ⟨ l′ ⟩ U l ∷ U (1+ l)
-  univInUniv {l = l} l< [U] = ⊩ᵛ∷⇔ .proj₂ ([U] , λ ⊩σ →
-    case escape-⊩ˢ∷ ⊩σ of λ
-      (⊢Δ , _) → (
-        let [U]′ =  Uᵣ (Uᵣ l ≤′-refl (idRed:*: (Uⱼ ⊢Δ)))
-        in (⊩∷U⇔ .proj₂ (l< , [U]′ ,
-        (U l , idRedTerm:*: (Uⱼ ⊢Δ) , Uₙ , ≅-Urefl ⊢Δ ))) ,
-        λ _ → Type→⊩≡∷U⇔ Uₙ Uₙ .proj₂
-          (l< , ⊩U≡⇔ .proj₂ (≤′-refl , ⊢Δ , idRed:*: (Uⱼ ⊢Δ) , [U]′)
-          , Uⱼ ⊢Δ , Uⱼ ⊢Δ , ≅-Urefl ⊢Δ)))
+-- TODO continue with this if needed
+-- opaque
+--   univInUniv : (1+ l < l′) → ([U] : Γ ⊩ᵛ⟨ l′ ⟩ U (1+ l)) → Γ ⊩ᵛ⟨ l′ ⟩ U l ∷ U (1+ l)
+--   univInUniv {l = l} l< [U] = ⊩ᵛ∷⇔ .proj₂ ([U] , λ ⊩σ →
+--     case escape-⊩ˢ∷ ⊩σ of λ
+--       (⊢Δ , _) → (
+--         let [U]′ =  Uᵣ (Uᵣ l ≤′-refl (idRed:*: (Uⱼ ⊢Δ)))
+--         in (⊩∷U⇔ .proj₂ (l< , [U]′ ,
+--         (U l , idRedTerm:*: (Uⱼ ⊢Δ) , Uₙ , ≅-Urefl ⊢Δ ))) ,
+--         λ _ → Type→⊩≡∷U⇔ Uₙ Uₙ .proj₂
+--           (l< , ⊩U≡⇔ .proj₂ (≤′-refl , ⊢Δ , idRed:*: (Uⱼ ⊢Δ) , [U]′)
+--           , Uⱼ ⊢Δ , Uⱼ ⊢Δ , ≅-Urefl ⊢Δ)))
 
 opaque
 
@@ -364,28 +360,15 @@ opaque
     Γ ⊩ᵛ⟨ l″ ⟩ A
   ⊩ᵛ∷U→⊩ᵛ ⊩A∷U =
     -- TODO change
-    -- case ⊩ᵛ∷⇔ .proj₁ ⊩A∷U of λ
-    --   (⊩U , A≡A∷U) →
-    -- emb-⊩ᵛ ⁰≤ $
-    -- ⊩ᵛ⇔ .proj₂
-    --   ( wf-⊩ᵛ ⊩U
-    --   , λ σ₁≡σ₂ →
-    --       case ⊩≡∷U⇔ .proj₁ $ A≡A∷U σ₁≡σ₂ of λ {
-    --         ((_ , 0<1 , ⊩A[σ₁]≡A[σ₂]) , _) →
-    --       ⊩A[σ₁]≡A[σ₂] }
-    case ⊩ᵛ∷⇔′ .proj₁ ⊩A∷U of λ
-      (⊩U , ⊩A∷U , A≡A∷U) →
+    case ⊩ᵛ∷⇔ .proj₁ ⊩A∷U of λ
+      (⊩U , A≡A∷U) →
     emb-⊩ᵛ ≤′-refl $
-    ⊩ᵛ⇔′ .proj₂
+    ⊩ᵛ⇔ .proj₂
       ( wf-⊩ᵛ ⊩U
-      , (λ ⊩σ →
-           case ⊩∷U⇔ .proj₁ $ ⊩A∷U ⊩σ of λ {
-             (l< , ⊩A[σ] , _) →
-           ⊩A[σ] })
-      , (λ σ₁≡σ₂ →
-           case ⊩≡∷U⇔ .proj₁ $ A≡A∷U σ₁≡σ₂ of λ {
-             (0<1 , ⊩A[σ₁]≡A[σ₂] , _) →
-           ⊩A[σ₁]≡A[σ₂] })
+      , λ σ₁≡σ₂ →
+          case ⊩≡∷U⇔ .proj₁ $ A≡A∷U σ₁≡σ₂ of λ {
+            (0<1 , ⊩A[σ₁]≡A[σ₂] , _) →
+          ⊩A[σ₁]≡A[σ₂] }
       )
 
 opaque

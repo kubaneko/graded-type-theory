@@ -195,21 +195,10 @@ opaque
           case Unitⱼ ⊢Δ ok of λ
             ⊢Unit →
           -- TODO works?
-          -- Type→⊩≡∷U⇔ Unitₙ Unitₙ .proj₂
-          --   ( ⊢Unit , ⊢Unit , ≅ₜ-Unitrefl ⊢Δ ok
-          --   , (_ , 0<1 , refl-⊩≡ (⊩Unit ⊢Δ ok))
-          --   )
-          case ≅ₜ-Unitrefl ⊢Δ ok of λ
-            Unit≅Unit →
-            Type→⊩∷U⇔ Unitₙ .proj₂
-              ( ≤′-refl , ⊩Unit
-              , (⊢Unit , Unit≅Unit)
-              )
-          , λ _ →
-              Type→⊩≡∷U⇔ Unitₙ Unitₙ .proj₂
-                ( ≤′-refl , refl-⊩≡ ⊩Unit
-                , ⊢Unit , ⊢Unit , Unit≅Unit
-                )
+          Type→⊩≡∷U⇔ Unitₙ Unitₙ .proj₂
+            (
+            ≤′-refl , refl-⊩≡ (⊩Unit ⊢Δ ok) , ⊢Unit , ⊢Unit , ≅ₜ-Unitrefl ⊢Δ ok
+            )
       )
 
 ------------------------------------------------------------------------
