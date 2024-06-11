@@ -22,7 +22,7 @@ open import Definition.LogicalRelation.Properties R
 open import Definition.LogicalRelation.Substitution R
 open import Definition.Untyped M using (Con ; Term; U)
 
-open import Tools.Nat
+open import Tools.Nat hiding (_<_)
 open import Tools.Product
 
 private

@@ -38,17 +38,15 @@ private
     p q : M
     Γ : Con Term n
 
--- Conversion of syntactic reduction closures.
-convRed:*: : ∀ {t u A B} → Γ ⊢ t :⇒*: u ∷ A → Γ ⊢ A ≡ B → Γ ⊢ t :⇒*: u ∷ B
-convRed:*: [ ⊢t , ⊢u , d ] A≡B = [ conv ⊢t  A≡B , conv ⊢u  A≡B , conv* d  A≡B ]
-
-helper : {Γ : Con Term n} {t : Term n} {l l' l'' : TypeLevel} (p : l < l') → (q : l < l'') → LogRelKit._⊩_ (kit-helper p) Γ t → LogRelKit._⊩_ (kit-helper q) Γ t
+helper : {Γ : Con Term n} {t : Term n} {l l' l'' : TypeLevel} (p : l < l')
+  → (q : l < l'') → LogRelKit._⊩_ (kit′ p) Γ t → LogRelKit._⊩_ (kit′ q) Γ t
 helper ≤′-refl ≤′-refl t = t
 helper p (≤′-step q) t = helper p q t
 helper (≤′-step p) q t = helper p q t
 
-helperEq : {Γ : Con Term n} {t u : Term n} {l l' l'' : TypeLevel} (p : l < l') → (q : l < l'') ([t] : LogRelKit._⊩_ (kit-helper p) Γ t)
-                                    → LogRelKit._⊩_≡_/_ (kit-helper p) Γ t u [t] → LogRelKit._⊩_≡_/_ (kit-helper q) Γ t u (helper p q [t])
+helperEq : {Γ : Con Term n} {t u : Term n} {l l' l'' : TypeLevel} (p : l < l')
+    → (q : l < l'') ([t] : LogRelKit._⊩_ (kit′ p) Γ t) → LogRelKit._⊩_≡_/_ (kit′ p) Γ t u [t]
+    → LogRelKit._⊩_≡_/_ (kit′ q) Γ t u (helper p q [t])
 helperEq ≤′-refl ≤′-refl [t] eq = eq
 helperEq (≤′-step p) ≤′-refl [t] eq = helperEq p ≤′-refl [t] eq
 helperEq ≤′-refl (≤′-step q) [t] eq = helperEq ≤′-refl q [t] eq

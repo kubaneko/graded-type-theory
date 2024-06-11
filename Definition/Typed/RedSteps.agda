@@ -71,7 +71,7 @@ opaque
 
   -- A variant of univ*.
 
-  univ:*: : Γ ⊢ A :⇒*: B ∷ U → Γ ⊢ A :⇒*: B
+  univ:*: : Γ ⊢ A :⇒*: B ∷ U l → Γ ⊢ A :⇒*: B
   univ:*: [ ⊢A , ⊢B , A⇒*B ] = [ univ ⊢A , univ ⊢B , univ* A⇒*B ]
 
 -- Application substitution of reduction closures

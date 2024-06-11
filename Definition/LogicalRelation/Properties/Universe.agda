@@ -15,7 +15,8 @@ module Definition.LogicalRelation.Properties.Universe
 
 open EqRelSet {{...}}
 
-open import Definition.Untyped M hiding (_∷_)
+open import Definition.Untyped M
+open import Definition.Untyped.Neutral M
 open import Definition.Typed R
 open import Definition.Typed.Properties R
 open import Definition.LogicalRelation R
@@ -27,6 +28,7 @@ open import Definition.LogicalRelation.Irrelevance R
 open import Tools.Nat hiding (_<_; _≤_)
 open import Tools.Product
 open import Tools.Empty
+open import Tools.Function
 
 private
   variable
@@ -47,6 +49,7 @@ univEq :
 univEq [U] [A] =
   let Uel = U-elim (id (escape [U])) [U]
   in univEq′ Uel (irrelevanceTerm [U] (U-intr Uel) [A])
+
 
 -- Helper function for reducible term equality of type U for specific type derivations.
 univEqEq′ : ∀ {l l′ l″ A B} ([U] : Γ ⊩⟨ l ⟩U U l″) ([A] : Γ ⊩⟨ l′ ⟩ A)

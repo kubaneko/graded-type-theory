@@ -34,6 +34,7 @@ open import Definition.Untyped.Neutral M type-variant
 open import Definition.Untyped.Properties M
 
 open import Tools.Fin
+open import Tools.Nat using (≤′-refl; ≤′-step)
 open import Tools.Function
 open import Tools.Product as Σ
 import Tools.PropositionalEquality as PE
@@ -66,15 +67,15 @@ opaque
 
   -- A characterisation lemma for _⊩⟨_⟩_∷_.
 
-  ⊩ℕ∷U⇔ : Γ ⊩⟨ ¹ ⟩ ℕ ∷ U ⇔ ⊢ Γ
+  ⊩ℕ∷U⇔ : Γ ⊩⟨ 1 ⟩ ℕ ∷ U 0 ⇔ ⊢ Γ
   ⊩ℕ∷U⇔ =
       (λ ⊩ℕ →
          case ⊩∷U⇔ .proj₁ ⊩ℕ of λ
-           (_ , _ , ℕ⇒* , _) →
+           (_ , _ , _ , ℕ⇒* , _) →
          wfTerm (⊢t-redₜ ℕ⇒*))
     , (λ ⊢Γ →
          ⊩∷U⇔ .proj₂
-           ( (_ , 0<1 , ⊩ℕ⇔ .proj₂ ⊢Γ)
+           ( ≤′-refl , ⊩ℕ⇔ .proj₂ ⊢Γ
            , (_ , idRedTerm:*: (ℕⱼ ⊢Γ) , ℕₙ , ≅ₜ-ℕrefl ⊢Γ)
            ))
 
@@ -96,7 +97,8 @@ opaque
       Γ ⊩⟨ l ⟩ t ∷ A / ℕ-intr ⊩A →
       Γ ⊩ℕ t ∷ℕ
     lemma (noemb _)    ⊩t = ⊩t
-    lemma (emb 0<1 ⊩A) ⊩t = lemma ⊩A ⊩t
+    lemma (emb ≤′-refl ⊩A) ⊩t = lemma ⊩A ⊩t
+    lemma (emb (≤′-step s) ⊩A) ⊩t = lemma (emb s ⊩A) ⊩t
 
 opaque
   unfolding _⊩⟨_⟩_≡_
@@ -121,23 +123,24 @@ opaque
       Γ ⊩⟨ l ⟩ A ≡ B / ℕ-intr ⊩A →
       Γ ⊩ℕ A ≡ B
     lemma (noemb _)    A≡B = A≡B
-    lemma (emb 0<1 ⊩A) A≡B = lemma ⊩A A≡B
+    lemma (emb ≤′-refl ⊩A) A≡B = lemma ⊩A A≡B
+    lemma (emb (≤′-step s) ⊩A) A≡B = lemma (emb s ⊩A) A≡B
 
 opaque
 
   -- A characterisation lemma for _⊩⟨_⟩_≡_∷_.
 
-  ⊩ℕ≡ℕ∷U⇔ : Γ ⊩⟨ ¹ ⟩ ℕ ≡ ℕ ∷ U ⇔ ⊢ Γ
+  ⊩ℕ≡ℕ∷U⇔ : Γ ⊩⟨ 1 ⟩ ℕ ≡ ℕ ∷ U 0 ⇔ ⊢ Γ
   ⊩ℕ≡ℕ∷U⇔ =
       (λ ℕ≡ℕ →
          case ⊩≡∷U⇔ .proj₁ ℕ≡ℕ of λ
-           (_ , _ , _ , ℕ⇒* , _) →
+           (_ , _ , _ , _ , ℕ⇒* , _) →
          wfTerm (⊢t-redₜ ℕ⇒*))
     , (λ ⊢Γ →
          case idRedTerm:*: (ℕⱼ ⊢Γ) of λ
            ℕ⇒*ℕ →
          ⊩≡∷U⇔ .proj₂
-           ( (_ , 0<1 , ⊩ℕ≡⇔ .proj₂ (id (ℕⱼ ⊢Γ)))
+           ( ≤′-refl , ⊩ℕ≡⇔ .proj₂ (id (ℕⱼ ⊢Γ))
            , (_ , _ , ℕ⇒*ℕ , ℕ⇒*ℕ , ℕₙ , ℕₙ , ≅ₜ-ℕrefl ⊢Γ)
            ))
 
@@ -166,7 +169,8 @@ opaque
       Γ ⊩⟨ l ⟩ t ≡ u ∷ A / ℕ-intr ⊩A →
       Γ ⊩ℕ t ∷ℕ × Γ ⊩ℕ u ∷ℕ × Γ ⊩ℕ t ≡ u ∷ℕ
     lemma (noemb _)    ⊩t ⊩u t≡u = ⊩t , ⊩u , t≡u
-    lemma (emb 0<1 ⊩A) ⊩t ⊩u t≡u = lemma ⊩A ⊩t ⊩u t≡u
+    lemma (emb ≤′-refl ⊩A) ⊩t ⊩u t≡u = lemma ⊩A ⊩t ⊩u t≡u
+    lemma (emb (≤′-step s) ⊩A) ⊩t ⊩u t≡u = lemma (emb s ⊩A) ⊩t ⊩u t≡u
 
 ------------------------------------------------------------------------
 -- ℕ
@@ -191,8 +195,8 @@ opaque
 
   -- Validity of ℕ, seen as a term former.
 
-  ℕᵗᵛ : ⊩ᵛ Γ → Γ ⊩ᵛ⟨ ¹ ⟩ ℕ ∷ U
-  ℕᵗᵛ {Γ} ⊩Γ =
+  ℕᵗᵛ : ⊩ᵛ Γ → Γ ⊩ᵛ⟨ 1 ⟩ ℕ ∷ U 0
+  ℕᵗᵛ ⊩Γ =
     ⊩ᵛ∷⇔ .proj₂
       ( ⊩ᵛU ⊩Γ
       , λ {_} {Δ = Δ} {σ₁ = σ₁} {σ₂ = σ₂} →

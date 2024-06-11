@@ -326,7 +326,7 @@ mutual
                   → Γ ⊢ t′ ∷ Unit k
                   → Unit-with-η k
                   → Γ ⊢ t ≡ t′ ∷ Unit k
-    Id-cong       : Γ ⊢ A₁ ≡ A₂ ∷ U
+    Id-cong       : Γ ⊢ A₁ ≡ A₂ ∷ U l
                   → Γ ⊢ t₁ ≡ t₂ ∷ A₁
                   → Γ ⊢ u₁ ≡ u₂ ∷ A₁
                   → Γ ⊢ Id A₁ t₁ u₁ ≡ Id A₂ t₂ u₂ ∷ U l

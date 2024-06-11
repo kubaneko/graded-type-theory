@@ -19,7 +19,7 @@ open import Definition.Untyped.NotParametrised public
 private
   variable
     p p′ : M
-    n m ℓ : Nat
+    n m ℓ l : Nat
     bs bs′ : List _
     ts ts′ : GenTs _ _ _
 

@@ -29,6 +29,7 @@ open import
   Definition.LogicalRelation.Substitution.Introductions.SingleSubst R
 import Definition.LogicalRelation.Substitution.Irrelevance R as Irr
 open import Definition.LogicalRelation.Substitution.MaybeEmbed R
+open import Definition.LogicalRelation.Substitution.Cumulativity R as C
 open import Definition.LogicalRelation.Substitution.Properties R
 open import Definition.LogicalRelation.Substitution.Reducibility R
 open import Definition.LogicalRelation.Substitution.Reduction R
@@ -45,7 +46,7 @@ open import Definition.Untyped.Properties M
 
 open import Tools.Fin
 open import Tools.Function
-open import Tools.Nat using (Nat)
+open import Tools.Nat using (Nat; 1+; ≤′-refl; ≤′-step)
 open import Tools.Product as Σ
 import Tools.PropositionalEquality as PE
 open import Tools.Reasoning.PropositionalEquality
@@ -1463,10 +1464,10 @@ opaque
     l ≤ l′ →
     Γ ⊩⟨ l ⟩ t ∷ A →
     Γ ⊩⟨ l′ ⟩ t ∷ A
-  emb-⊩∷     refl       ⊩t        = ⊩t
-  emb-⊩∷ {Γ} (emb l<l′) (⊩A , ⊩t) =
-      emb l<l′ (PE.subst (λ k → LogRelKit._⊩_ k _ _) (kit≡kit′ l<l′) ⊩A)
-    , emb-⊩∷-lemma (kit≡kit′ l<l′) ⊩t
+  emb-⊩∷  ≤′-refl ⊩t        = ⊩t
+  emb-⊩∷ (≤′-step  l<l′) (⊩A , ⊩t) =
+      emb (≤→< l<l′) (PE.subst (λ k → LogRelKit._⊩_ k _ _) (kit≡kit′ (≤→< l<l′)) ⊩A)
+    , emb-⊩∷-lemma {l<l′ = ≤→< l<l′} {⊩A = ⊩A} (kit≡kit′ (≤→< l<l′)) ⊩t
 
 opaque
   unfolding _⊩⟨_⟩_≡_
@@ -1477,17 +1478,17 @@ opaque
     l ≤ l′ →
     Γ ⊩⟨ l ⟩ A ≡ B →
     Γ ⊩⟨ l′ ⟩ A ≡ B
-  emb-⊩≡     refl       A≡B             = A≡B
-  emb-⊩≡ {Γ} (emb l<l′) (⊩A , ⊩B , A≡B) =
-      emb l<l′ (PE.subst (λ k → LogRelKit._⊩_ k _ _) (kit≡kit′ l<l′) ⊩A)
-    , emb l<l′ (PE.subst (λ k → LogRelKit._⊩_ k _ _) (kit≡kit′ l<l′) ⊩B)
-    , lemma (kit≡kit′ l<l′) A≡B
+  emb-⊩≡     ≤′-refl    A≡B             = A≡B
+  emb-⊩≡ {Γ} (≤′-step l<l′) (⊩A , ⊩B , A≡B) =
+      emb (≤→< l<l′) (PE.subst (λ k → LogRelKit._⊩_ k _ _) (kit≡kit′ (≤→< l<l′)) ⊩A)
+    , emb (≤→< l<l′) (PE.subst (λ k → LogRelKit._⊩_ k _ _) (kit≡kit′ (≤→< l<l′)) ⊩B)
+    , lemma (kit≡kit′ (≤→< l<l′)) A≡B
     where
     lemma :
       {⊩A : LogRelKit._⊩_ k Γ A}
-      (eq : k PE.≡ kit′ l<l′) →
+      (eq : k PE.≡ kit′ (≤→< l<l′)) →
       LogRelKit._⊩_≡_/_ k Γ A B ⊩A →
-      LogRelKit._⊩_≡_/_ (kit′ l<l′) Γ A B
+      LogRelKit._⊩_≡_/_ (kit′ (≤→< l<l′)) Γ A B
         (PE.subst (λ k → LogRelKit._⊩_ k _ _) eq ⊩A)
     lemma PE.refl A≡B = A≡B
 
@@ -1500,17 +1501,18 @@ opaque
     l ≤ l′ →
     Γ ⊩⟨ l ⟩ t ≡ u ∷ A →
     Γ ⊩⟨ l′ ⟩ t ≡ u ∷ A
-  emb-⊩≡∷     refl       t≡u                  = t≡u
-  emb-⊩≡∷ {Γ} (emb l<l′) (⊩A , ⊩t , ⊩u , t≡u) =
-      emb l<l′ (PE.subst (λ k → LogRelKit._⊩_ k _ _) (kit≡kit′ l<l′) ⊩A)
-    , emb-⊩∷-lemma (kit≡kit′ l<l′) ⊩t , emb-⊩∷-lemma (kit≡kit′ l<l′) ⊩u
-    , lemma (kit≡kit′ l<l′) t≡u
+  emb-⊩≡∷     ≤′-refl   t≡u                  = t≡u
+  emb-⊩≡∷ {Γ} (≤′-step l<l′) (⊩A , ⊩t , ⊩u , t≡u) =
+      emb (≤→< l<l′) (PE.subst (λ k → LogRelKit._⊩_ k _ _) (kit≡kit′ (≤→< l<l′)) ⊩A)
+    , emb-⊩∷-lemma {l<l′ = ≤→< l<l′} {⊩A = ⊩A} (kit≡kit′ (≤→< l<l′)) ⊩t
+    , emb-⊩∷-lemma {l<l′ = ≤→< l<l′} {⊩A = ⊩A} (kit≡kit′ (≤→< l<l′)) ⊩u
+    , lemma (kit≡kit′ (≤→< l<l′)) t≡u
     where
     lemma :
       {⊩A : LogRelKit._⊩_ k Γ A}
-      (eq : k PE.≡ kit′ l<l′) →
+      (eq : k PE.≡ kit′ (≤→< l<l′)) →
       LogRelKit._⊩_≡_∷_/_ k Γ t u A ⊩A →
-      LogRelKit._⊩_≡_∷_/_ (kit′ l<l′) Γ t u A
+      LogRelKit._⊩_≡_∷_/_ (kit′ (≤→< l<l′)) Γ t u A
         (PE.subst (λ k → LogRelKit._⊩_ k _ _) eq ⊩A)
     lemma PE.refl t≡u = t≡u
 
@@ -1523,9 +1525,9 @@ opaque
     l ≤ l′ →
     Γ ⊩ᵛ⟨ l ⟩ A →
     Γ ⊩ᵛ⟨ l′ ⟩ A
-  emb-⊩ᵛ refl      ⊩A       = ⊩A
-  emb-⊩ᵛ (emb 0<1) (_ , ⊩A) =
-    _ , maybeEmbᵛ _ ⊩A
+  emb-⊩ᵛ ≤′-refl      ⊩A       = ⊩A
+  emb-⊩ᵛ (≤′-step l<) (_ , ⊩A) =
+    _ , C.cumul _ (≤→< l<) ⊩A
 
 opaque
 

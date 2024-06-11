@@ -17,14 +17,14 @@ module Definition.LogicalRelation.Substitution.Cumulativity
 
 open EqRelSet {{...}}
 
-open import Definition.Untyped M hiding (_∷_)
+open import Definition.Untyped M
 open import Definition.Typed R
 open import Definition.LogicalRelation R
 import Definition.LogicalRelation.Properties.Cumulativity R as LR
 open import Definition.LogicalRelation.Substitution R
 
 open import Tools.Level
-open import Tools.Nat hiding (_<_)
+open import Tools.Nat hiding (_<_; _≤_)
 open import Tools.Product
 open import Tools.Unit
 import Tools.PropositionalEquality as PE
@@ -47,3 +47,10 @@ opaque mutual
     (λ [σ′] [σ≡σ′] → LR.cumulEq l< (proj₁ (unwrap ⊢Δ [σ]))
             ((proj₂ (unwrap ⊢Δ [σ])) [σ′] [σ≡σ′])))
 
+  -- Well-formness is cumulative
+  cumul≤ : ∀ {l l′ A} → ([Γ] : ⊩ᵛ Γ) → l ≤ l′ → Γ ⊩ᵛ⟨ l ⟩ A / [Γ] →  Γ ⊩ᵛ⟨ l′ ⟩ A / [Γ]
+  cumul≤ [Γ] ≤′-refl [A] = [A]
+  cumul≤ [Γ] (≤′-step l<) (wrap unwrap) =
+    wrap (λ ⊢Δ [σ] → (LR.cumul (≤→< l<) (proj₁ (unwrap ⊢Δ [σ]))) ,
+    (λ [σ′] [σ≡σ′] → LR.cumulEq (≤→< l<) (proj₁ (unwrap ⊢Δ [σ]))
+            ((proj₂ (unwrap ⊢Δ [σ])) [σ′] [σ≡σ′])))

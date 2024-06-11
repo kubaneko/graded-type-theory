@@ -122,7 +122,7 @@ record EqRelSet : Set (lsuc ℓ) where
            → Γ ⊢ a  ≅ b  ∷ A
 
     -- Universe type reflexivity
-    ≅-Urefl   : ⊢ Γ → Γ ⊢ U l₁ ≅ U l₁
+    ≅-Urefl   : ⊢ Γ → Γ ⊢ U l₁ ≅ U l₁ ∷ U (1+ l₁)
 
     -- Natural number type reflexivity
     ≅ₜ-ℕrefl : ⊢ Γ → Γ ⊢ ℕ ≅ ℕ ∷ U 0

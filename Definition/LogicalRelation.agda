@@ -25,7 +25,8 @@ open import Definition.Typed.Weakening R
 open import Tools.Empty
 open import Tools.Function
 open import Tools.Level
-open import Tools.Nat using (Nat; 1+; _<′_; ≤′-step; ≤′-refl)
+open import Tools.Nat using
+  (Nat; 1+; _<′_; ≤′-step; ≤′-refl; _⊔_; _≤′_; <⇒<′; s≤s; ≤′⇒≤; ≤⇒≤′; ≤⇒pred≤)
 open import Tools.Product
 import Tools.PropositionalEquality as PE
 open import Tools.Relation
@@ -203,14 +204,26 @@ data _⊩Unit⟨_⟩_≡_∷Unit
 TypeLevel : Set
 TypeLevel = Nat
 
+_⊔T_ : (i j : TypeLevel) → TypeLevel
+i ⊔T j = Tools.Nat._⊔_ i j
+
+
+
 _<_ : (i j : TypeLevel) → Set
 i < j = i <′ j
 
 -- Ordering of type levels.
 
-data _≤_ (l : TypeLevel) : TypeLevel → Set where
-  refl : l ≤ l
-  emb  : ∀ {l′} → l <′ l′ → l ≤ l′
+_≤_ : (i j : TypeLevel) → Set
+i ≤ j = i ≤′ j
+
+opaque
+  ≤→< : {a b : TypeLevel} → a ≤ b → a < 1+ b
+  ≤→< l< = (<⇒<′ (s≤s (≤′⇒≤ l<)))
+
+opaque
+  ≤pred≤ : {a b : TypeLevel} → 1+ a ≤ b → a ≤ b
+  ≤pred≤ l< = (≤⇒≤′ (≤⇒pred≤ (≤′⇒≤ l<)))
 
 -- Reducibility of Neutrals part 2:
 
@@ -634,7 +647,7 @@ mutual
 
   kit′ : {n m : TypeLevel} → m < n → LogRelKit
   kit′ {m = m} ≤′-refl = kit m
-  kit′ (≤′-step p) = kit-helper p
+  kit′ (≤′-step p) = kit′ p
 
 opaque
 
@@ -678,7 +691,7 @@ _⊩⟨_⟩_≡_∷_/_ : (Γ : Con Term ℓ) (l : TypeLevel) (t u A : Term ℓ) 
 emb-⊩ : {l′ l : TypeLevel} {Γ : Con Term ℓ} {A : Term ℓ} → l′ < l → Γ ⊩⟨ l′ ⟩ A → Γ ⊩⟨ l ⟩ A
 emb-⊩ p A = emb p (lemma p A)
   where
-  lemma : {l′ l : TypeLevel} {Γ : Con Term ℓ} {A : Term ℓ} → (p : l′ < l) → Γ ⊩⟨ l′ ⟩ A → LogRelKit._⊩_ (kit-helper p) Γ A
+  lemma : {l′ l : TypeLevel} {Γ : Con Term ℓ} {A : Term ℓ} → (p : l′ < l) → Γ ⊩⟨ l′ ⟩ A → LogRelKit._⊩_ (kit′ p) Γ A
   lemma ≤′-refl A = A
   lemma (≤′-step p) A = lemma p A
 

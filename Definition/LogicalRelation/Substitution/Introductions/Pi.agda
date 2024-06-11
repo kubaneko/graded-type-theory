@@ -179,6 +179,144 @@ opaque
 
 opaque
   unfolding _⊩⟨_⟩_≡_∷_
+-- TODO works without it?
+-- -- Validity of ⟦ W ⟧ as a term.
+-- Wᵗᵛ : ∀ {Γ : Con Term n} {F G} {l} W ([Γ] : ⊩ᵛ_ {n = n} Γ)
+--       ([F] : Γ ⊩ᵛ⟨ l ⟩ F / [Γ])
+--       ([U] : Γ ∙ F ⊩ᵛ⟨ 1+ l ⟩ U l / [Γ] ∙ [F])
+--     → Γ ⊩ᵛ⟨ 1+ l ⟩ F ∷ U l / [Γ] / Uᵛ [Γ]
+--     → Γ ∙ F ⊩ᵛ⟨ 1+ l ⟩ G ∷ U l / [Γ] ∙ [F] / [U]
+--     → BindingType-allowed W
+--     → Γ ⊩ᵛ⟨ 1+ l ⟩ ⟦ W ⟧ F ▹ G ∷ U l / [Γ] / Uᵛ [Γ]
+-- Wᵗᵛ {Γ = Γ} {F} {G} {l} W [Γ] [F] [U] [Fₜ] [Gₜ] ok {Δ = Δ} {σ = σ} ⊢Δ [σ] =
+--   let [liftσ] = liftSubstS {F = F} [Γ] ⊢Δ [F] [σ]
+--       ⊢F = escape (proj₁ (unwrap [F] ⊢Δ [σ]))
+--       ⊢Fₜ = escapeTerm (Uᵣ′ _ ≤′-refl (idRed:*: (Uⱼ ⊢Δ))) (proj₁ ([Fₜ] ⊢Δ [σ]))
+--       ⊢F≡Fₜ = escapeTermEq (Uᵣ′ _ ≤′-refl (idRed:*: (Uⱼ ⊢Δ)))
+--                                (reflEqTerm (Uᵣ′ _ ≤′-refl (idRed:*: (Uⱼ ⊢Δ))) (proj₁ ([Fₜ] ⊢Δ [σ])))
+--       ⊢Gₜ = escapeTerm (proj₁ (unwrap [U] (⊢Δ ∙ ⊢F) [liftσ]))
+--                            (proj₁ ([Gₜ] (⊢Δ ∙ ⊢F) [liftσ]))
+--       ⊢G≡Gₜ = escapeTermEq (proj₁ (unwrap [U] (⊢Δ ∙ ⊢F) [liftσ]))
+--                                (reflEqTerm (proj₁ (unwrap [U] (⊢Δ ∙ ⊢F) [liftσ]))
+--                                            (proj₁ ([Gₜ] (⊢Δ ∙ ⊢F) [liftσ])))
+--       [F]₀ = univᵛ {A = F} [Γ] (Uᵛ [Γ]) [Fₜ]
+--       [Gₜ]′ = S.irrelevanceTerm {A = U l} {t = G}
+--                                 (_∙_ {A = F} [Γ] [F]) (_∙_ {A = F} [Γ] [F]₀)
+--                                 [U] (Uᵛ ([Γ] ∙ [F]₀)) [Gₜ]
+--       [G]₀ = univᵛ {A = G} (_∙_ {A = F} [Γ] [F]₀)
+--                    (Uᵛ ([Γ] ∙ [F]₀)) [Gₜ]′
+--       [ΠFG] = unwrap (⟦ W ⟧ᵛ {F = F} {G} [Γ] [F]₀ [G]₀ ok) ⊢Δ [σ]
+--   in  Uₜ (⟦ W ⟧ F [ σ ] ▹ (G [ liftSubst σ ]))
+--          (PE.subst
+--             (Δ ⊢_:⇒*: ⟦ W ⟧ F [ σ ] ▹ (G [ liftSubst σ ]) ∷ U l)
+--             (PE.sym (B-subst σ W F G))
+--             (idRedTerm:*: (PE.subst (λ x → _ ⊢ ⟦ _ ⟧ _ ▹ _ ∷ U x) (⊔-idem l) (⟦ W ⟧ⱼᵤ ⊢Fₜ ⊢Gₜ ok) )))
+--          ⟦ W ⟧-type (PE.subst (λ x → _ ⊢ ⟦ _ ⟧ _ ▹ _ ≅ ⟦ _ ⟧ _ ▹ _ ∷ U x)
+--                     (⊔-idem l) (≅ₜ-W-cong W ⊢F ⊢F≡Fₜ ⊢G≡Gₜ ok) ) (proj₁ [ΠFG])
+--   ,   (λ {σ′} [σ′] [σ≡σ′] →
+--          let [liftσ′] = liftSubstS {F = F} [Γ] ⊢Δ [F] [σ′]
+--              [wk1σ] = wk1SubstS [Γ] ⊢Δ ⊢F [σ]
+--              [wk1σ′] = wk1SubstS [Γ] ⊢Δ ⊢F [σ′]
+--              var0 = conv (var (⊢Δ ∙ ⊢F)
+--                          (PE.subst (λ x → x0 ∷ x ∈ Δ ∙ F [ σ ])
+--                                    (wk-subst F) here))
+--                     (≅-eq (escapeEq (proj₁ (unwrap [F] (⊢Δ ∙ ⊢F) [wk1σ]))
+--                                         (proj₂ (unwrap [F] (⊢Δ ∙ ⊢F) [wk1σ]) [wk1σ′]
+--                                                (wk1SubstSEq [Γ] ⊢Δ ⊢F [σ] [σ≡σ′]))))
+--              [liftσ′]′ = [wk1σ′]
+--                        , neuTerm (proj₁ (unwrap [F] (⊢Δ ∙ ⊢F) [wk1σ′])) (var x0)
+--                                  var0 (~-var var0)
+--              ⊢F′ = escape (proj₁ (unwrap [F] ⊢Δ [σ′]))
+--              ⊢Fₜ′ = escapeTerm (Uᵣ′ _ ≤′-refl (idRed:*: (Uⱼ ⊢Δ))) (proj₁ ([Fₜ] ⊢Δ [σ′]))
+--              ⊢Gₜ′ = escapeTerm (proj₁ (unwrap [U] (⊢Δ ∙ ⊢F′) [liftσ′]))
+--                                   (proj₁ ([Gₜ] (⊢Δ ∙ ⊢F′) [liftσ′]))
+--              ⊢F≡F′ = escapeTermEq (Uᵣ′ _ ≤′-refl (idRed:*: (Uⱼ ⊢Δ)))
+--                                      (proj₂ ([Fₜ] ⊢Δ [σ]) [σ′] [σ≡σ′])
+--              ⊢G≡G′ = escapeTermEq (proj₁ (unwrap [U] (⊢Δ ∙ ⊢F) [liftσ]))
+--                                      (proj₂ ([Gₜ] (⊢Δ ∙ ⊢F) [liftσ]) [liftσ′]′
+--                                             (liftSubstSEq {F = F} [Γ] ⊢Δ [F] [σ] [σ≡σ′]))
+--              [ΠFG]′ = unwrap (⟦ W ⟧ᵛ {F = F} {G} [Γ] [F]₀ [G]₀ ok)
+--                         ⊢Δ [σ′]
+--          in  Uₜ₌ (⟦ W ⟧ F [ σ ] ▹ (G [ liftSubst σ ]))
+--                  (⟦ W ⟧ F [ σ′ ] ▹ (G [ liftSubst σ′ ]))
+--                  (PE.subst
+--                    (λ x → Δ ⊢ x :⇒*: ⟦ W ⟧ F [ σ ] ▹ (G [ liftSubst σ ]) ∷ U l)
+--                    (PE.sym (B-subst σ W F G))
+--                    (idRedTerm:*: (PE.subst (λ x → _ ⊢ ⟦ _ ⟧ _ ▹ _ ∷ U x) (⊔-idem l) (⟦ W ⟧ⱼᵤ ⊢Fₜ ⊢Gₜ ok) )))
+--                  (PE.subst
+--                    (λ x → Δ ⊢ x :⇒*: ⟦ W ⟧ F [ σ′ ] ▹ (G [ liftSubst σ′ ]) ∷ U l)
+--                    (PE.sym (B-subst σ′ W F G))
+--                    (idRedTerm:*: (PE.subst (λ x → _ ⊢ ⟦ _ ⟧ _ ▹ _ ∷ U x) (⊔-idem l) (⟦ W ⟧ⱼᵤ ⊢Fₜ′ ⊢Gₜ′ ok) )))
+--                  ⟦ W ⟧-type ⟦ W ⟧-type (PE.subst (λ x → _ ⊢ ⟦ _ ⟧ _ ▹ _ ≅ ⟦ _ ⟧ _ ▹ _ ∷ U x)
+--                     (⊔-idem l) (≅ₜ-W-cong W ⊢F ⊢F≡F′ ⊢G≡G′ ok))
+--                  (proj₁ [ΠFG]) (proj₁ [ΠFG]′) (proj₂ [ΠFG] [σ′] [σ≡σ′]))
+
+-- -- Validity of W-congruence as a term equality.
+-- W-congᵗᵛ : ∀ {Γ : Con Term n} {F G H E} {l} W
+--            ([Γ] : ⊩ᵛ_ {n = n} Γ)
+--            ([F] : Γ ⊩ᵛ⟨ l ⟩ F / [Γ])
+--            ([H] : Γ ⊩ᵛ⟨ l ⟩ H / [Γ])
+--            ([UF] : Γ ∙ F ⊩ᵛ⟨ 1+ l ⟩ U l / [Γ] ∙ [F])
+--            ([UH] : Γ ∙ H ⊩ᵛ⟨ 1+ l ⟩ U l / [Γ] ∙ [H])
+--            ([F]ₜ : Γ ⊩ᵛ⟨ 1+ l ⟩ F ∷ U l / [Γ] / Uᵛ [Γ])
+--            ([G]ₜ : Γ ∙ F ⊩ᵛ⟨ 1+ l ⟩ G ∷ U l / [Γ] ∙ [F] / [UF])
+--            ([H]ₜ : Γ ⊩ᵛ⟨ 1+ l ⟩ H ∷ U l / [Γ] / Uᵛ [Γ])
+--            ([E]ₜ : Γ ∙ H ⊩ᵛ⟨ 1+ l ⟩ E ∷ U l / [Γ] ∙ [H] / [UH])
+--            ([F≡H]ₜ : Γ ⊩ᵛ⟨ 1+ l ⟩ F ≡ H ∷ U l / [Γ] / Uᵛ [Γ])
+--            ([G≡E]ₜ : Γ ∙ F ⊩ᵛ⟨ 1+ l ⟩ G ≡ E ∷ U l / [Γ] ∙ [F] / [UF])
+--          → BindingType-allowed W
+--          → Γ ⊩ᵛ⟨ 1+ l ⟩ ⟦ W ⟧ F ▹ G ≡ ⟦ W ⟧ H ▹ E ∷ U l / [Γ] / Uᵛ [Γ]
+-- W-congᵗᵛ
+--   {F = F} {G} {H} {E} {l} W [Γ] [F] [H] [UF] [UH] [F]ₜ [G]ₜ [H]ₜ [E]ₜ [F≡H]ₜ
+--   [G≡E]ₜ ok {Δ = Δ} {σ = σ} ⊢Δ [σ] =
+--   let ⊢F = escape (proj₁ (unwrap [F] ⊢Δ [σ]))
+--       ⊢H = escape (proj₁ (unwrap [H] ⊢Δ [σ]))
+--       [liftFσ] = liftSubstS {F = F} [Γ] ⊢Δ [F] [σ]
+--       [liftHσ] = liftSubstS {F = H} [Γ] ⊢Δ [H] [σ]
+--       [F]ᵤ = univᵛ {A = F} [Γ] (Uᵛ [Γ]) [F]ₜ
+--       [G]ᵤ₁ = univᵛ {A = G} {l′ = l} (_∙_ {A = F} [Γ] [F]) [UF] [G]ₜ
+--       [G]ᵤ = S.irrelevance {A = G} (_∙_ {A = F} [Γ] [F])
+--                            (_∙_ {A = F} [Γ] [F]ᵤ) [G]ᵤ₁
+--       [H]ᵤ = univᵛ {A = H} [Γ] (Uᵛ [Γ]) [H]ₜ
+--       [E]ᵤ = S.irrelevance {A = E} (_∙_ {A = H} [Γ] [H]) (_∙_ {A = H} [Γ] [H]ᵤ)
+--                            (univᵛ {A = E} {l′ = l} (_∙_ {A = H} [Γ] [H]) [UH] [E]ₜ)
+--       [F≡H]ᵤ = univEqᵛ {A = F} {H} [Γ] (Uᵛ [Γ]) [F]ᵤ [F≡H]ₜ
+--       [G≡E]ᵤ = S.irrelevanceEq {A = G} {B = E} (_∙_ {A = F} [Γ] [F])
+--                                (_∙_ {A = F} [Γ] [F]ᵤ) [G]ᵤ₁ [G]ᵤ
+--                  (univEqᵛ {A = G} {E} (_∙_ {A = F} [Γ] [F]) [UF] [G]ᵤ₁ [G≡E]ₜ)
+--       ΠFGₜ =
+--         ⟦ W ⟧ⱼᵤ
+--           (escapeTerm {l = 1+ l} (Uᵣ′ _ ≤′-refl (idRed:*: (Uⱼ ⊢Δ))) (proj₁ ([F]ₜ ⊢Δ [σ])))
+--           (escapeTerm (proj₁ (unwrap [UF] (⊢Δ ∙ ⊢F) [liftFσ]))
+--              (proj₁ ([G]ₜ (⊢Δ ∙ ⊢F) [liftFσ])))
+--           ok
+--       ΠHEₜ =
+--         ⟦ W ⟧ⱼᵤ
+--           (escapeTerm {l = 1+ l} (Uᵣ′ _ ≤′-refl (idRed:*: (Uⱼ ⊢Δ))) (proj₁ ([H]ₜ ⊢Δ [σ])))
+--           (escapeTerm (proj₁ (unwrap [UH] (⊢Δ ∙ ⊢H) [liftHσ]))
+--              (proj₁ ([E]ₜ (⊢Δ ∙ ⊢H) [liftHσ])))
+--           ok
+--   in  Uₜ₌ (⟦ W ⟧ F [ σ ] ▹ (G [ liftSubst σ ]))
+--           (⟦ W ⟧ H [ σ ] ▹ (E [ liftSubst σ ]))
+--           (PE.subst
+--             (λ x → Δ ⊢ x :⇒*: ⟦ W ⟧ F [ σ ] ▹ (G [ liftSubst σ ]) ∷ U l)
+--             (PE.sym (B-subst σ W F G))
+--             (idRedTerm:*: (PE.subst (λ x → _ ⊢ ⟦ _ ⟧ _ ▹ _ ∷ U x) (⊔-idem l) ΠFGₜ)))
+--           (PE.subst
+--              (Δ ⊢_:⇒*: ⟦ W ⟧ H [ σ ] ▹ (E [ liftSubst σ ]) ∷ U l)
+--              (PE.sym (B-subst σ W H E))
+--              (idRedTerm:*: (PE.subst (λ x → _ ⊢ ⟦ _ ⟧ _ ▹ _ ∷ U x) (⊔-idem l) ΠHEₜ)))
+--           ⟦ W ⟧-type ⟦ W ⟧-type
+--           (PE.subst (λ x → _ ⊢ ⟦ _ ⟧ _ ▹ _ ≅ ⟦ _ ⟧ _ ▹ _ ∷ U x) (⊔-idem l)
+--           (≅ₜ-W-cong W ⊢F (escapeTermEq (Uᵣ′ _ ≤′-refl (idRed:*: (Uⱼ ⊢Δ))) ([F≡H]ₜ ⊢Δ [σ]))
+--                         (escapeTermEq (proj₁ (unwrap [UF] (⊢Δ ∙ ⊢F) [liftFσ]))
+--                                           ([G≡E]ₜ (⊢Δ ∙ ⊢F) [liftFσ]))
+--                         ok))
+--           (proj₁ (unwrap (⟦ W ⟧ᵛ {F = F} {G} [Γ] [F]ᵤ [G]ᵤ ok) ⊢Δ [σ]))
+--           (proj₁ (unwrap (⟦ W ⟧ᵛ {F = H} {E} [Γ] [H]ᵤ [E]ᵤ ok) ⊢Δ [σ]))
+--           (W-congᵛ {F = F} {G} {H} {E} W [Γ] [F]ᵤ [G]ᵤ [H]ᵤ [E]ᵤ
+--              [F≡H]ᵤ [G≡E]ᵤ ok ⊢Δ [σ])
+-- >>>>>>> 1900fc27 (Substitution introductions and part of Fundamental lemma)
 
   -- A characterisation lemma for _⊩⟨_⟩_≡_∷_.
 

@@ -63,7 +63,7 @@ reflEq : ∀ {l A} ([A] : Γ ⊩⟨ l ⟩ A) → Γ ⊩⟨ l ⟩ A ≡ A / [A]
 reflEqTerm : ∀ {l A t} ([A] : Γ ⊩⟨ l ⟩ A)
            → Γ ⊩⟨ l ⟩ t ∷ A / [A]
            → Γ ⊩⟨ l ⟩ t ≡ t ∷ A / [A]
-refl-helper : ∀(p : l′ < l) → ([A] : LogRelKit._⊩_ (kit-helper p) Γ A) → Γ ⊩⟨ l ⟩ A ≡ A / emb p [A]
+refl-helper : ∀(p : l′ < l) → ([A] : LogRelKit._⊩_ (kit′ p) Γ A) → Γ ⊩⟨ l ⟩ A ≡ A / emb p [A]
 refl-helper ≤′-refl [A] = reflEq [A]
 refl-helper (≤′-step p) [A] = refl-helper p [A]
 
@@ -128,7 +128,7 @@ reflEqTerm (Idᵣ _) ⊩t =
        (ne _ t′~t′) → t′~t′)
 reflEqTerm (emb p [A]) t = refl-helper-Term p [A] t
   where
-    refl-helper-Term : ∀(p : l′ < l) → ([A] : LogRelKit._⊩_ (kit-helper p) Γ B) →
+    refl-helper-Term : ∀(p : l′ < l) → ([A] : LogRelKit._⊩_ (kit′ p) Γ B) →
       Γ ⊩⟨ l ⟩ A ∷ B / emb p [A] → Γ ⊩⟨ l ⟩ A ≡ A ∷ B / emb p [A]
     refl-helper-Term ≤′-refl [A] t =  reflEqTerm [A] t
     refl-helper-Term (≤′-step p) [A] t = refl-helper-Term p [A] t

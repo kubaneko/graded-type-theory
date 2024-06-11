@@ -16,7 +16,7 @@ open _≤_ public
 open import Data.Nat.DivMod
 open Data.Nat.DivMod using (_/_; m/n*n≤m) public
 open import Data.Nat.Properties
-open import Data.Nat using (_<′_; ≤′-refl; ≤′-step) public
+open import Data.Nat using (_<′_; ≤′-refl; ≤′-step; _≤′_) public
 open Data.Nat.Properties
   using (_≟_; _<?_; ≤-total;
          +-identityʳ; +-assoc; +-comm; +-0-isCommutativeMonoid;
@@ -24,15 +24,17 @@ open Data.Nat.Properties
          *-1-isCommutativeMonoid;
          m*n≡0⇒m≡0∨n≡0;
          ⊔-identityʳ; ⊔-assoc; ⊔-comm; ⊔-idem; m≥n⇒m⊔n≡m; m⊔n≡m⇒n≤m;
+         m<n⇒m<n⊔o; m<n⇒m<o⊔n; <⇒<′; <′⇒<;  ≤⇒≤′; ≤′⇒≤;
+         m≤n⇒m≤o⊔n; m≤n⇒m≤n⊔o;
          ⊓-assoc; ⊓-comm;
          +-distribˡ-⊔; *-distribˡ-+; *-distribˡ-⊔;
-         ⊓-distribʳ-⊔; ⊔-distribʳ-⊓;
+         ⊓-distribʳ-⊔; ⊔-distribʳ-⊓; ≤⇒pred≤;
          ⊔-absorbs-⊓; ⊓-absorbs-⊔;
          ≤-refl; ≤-reflexive; ≤-trans; ≤-antisym; module ≤-Reasoning;
          n≮n;
          +-mono-≤; m≤m+n; m≤n+m; 0<1+n; n≤1+n;
          *-mono-≤; m≤m*n; m≤n*m;
-         m≤m⊔n; m≤n⊔m;
+         m≤m⊔n; m≤n⊔m; s≤′s;
          m<n⊓o⇒m<n; m<n⊓o⇒m<o; ⊓-pres-m<;
          m⊓n≤m⊔n; n<1+n)
   public

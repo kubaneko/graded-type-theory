@@ -32,7 +32,7 @@ open import Definition.LogicalRelation.Properties.Transitivity R
 open import Definition.LogicalRelation.Properties.Whnf R
 
 open import Tools.Function
-open import Tools.Nat
+open import Tools.Nat hiding (_<_)
 open import Tools.Product
 import Tools.PropositionalEquality as PE
 open import Tools.Sum using (inj₁; inj₂)
@@ -236,10 +236,10 @@ opaque
   redSubst*′ :
     Γ ⊢ A :⇒*: B → (⊩A : Γ ⊩⟨ l ⟩ A) →
     (Γ ⊩⟨ l ⟩ B) × Γ ⊩⟨ l ⟩ A ≡ B / ⊩A
-  redSubst*′ A⇒*B ⊩U@(Uᵣ′ _ _ _) =
-    case whnfRed* (red A⇒*B) Uₙ of λ {
-      PE.refl →
-    ⊩U , reflEq ⊩U }
+  redSubst*′ A⇒*B ⊩U@(Uᵣ′ l l< D) =
+    case whrDet:⇒*: Uₙ D A⇒*B of λ
+      B⇒*U →
+    Uᵣ′ l l< B⇒*U , B⇒*U
   redSubst*′ A⇒*B (ℕᵣ A⇒*ℕ) =
     case whrDet:⇒*: ℕₙ A⇒*ℕ A⇒*B of λ
       B⇒*ℕ →
@@ -268,10 +268,14 @@ opaque
       Idᵣ (Idᵣ Ty lhs rhs B⇒*Id ⊩Ty ⊩lhs ⊩rhs)
     , Id₌′ B⇒*Id (reflEq ⊩Ty) (reflEqTerm ⊩Ty ⊩lhs)
         (reflEqTerm ⊩Ty ⊩rhs)
-  redSubst*′ A⇒*B (emb 0<1 ⊩A) =
-    case redSubst*′ A⇒*B ⊩A of λ
-      (⊩B , A≡B) →
-    emb 0<1 ⊩B , A≡B
+  redSubst*′ A⇒*B (emb ≤′-refl ⊩A) =
+      case redSubst*′ A⇒*B ⊩A of λ
+        (⊩B , A≡B) → (emb ≤′-refl ⊩B) ,
+          (irrelevanceEq ⊩A (emb ≤′-refl ⊩A) A≡B)
+  redSubst*′ A⇒*B (emb (≤′-step l<) ⊩A) =
+      case redSubst*′ A⇒*B (emb l< ⊩A) of λ
+        (⊩B , A≡B) → cumulStep ⊩B ,
+        (irrelevanceEq (emb l< ⊩A) (emb (≤′-step l<) ⊩A) A≡B)
 
 opaque
 
@@ -281,13 +285,18 @@ opaque
   redSubst*Term′ :
     Γ ⊢ t :⇒*: u ∷ A → (⊩A : Γ ⊩⟨ l ⟩ A) → Γ ⊩⟨ l ⟩ t ∷ A / ⊩A →
     Γ ⊩⟨ l ⟩ u ∷ A / ⊩A × Γ ⊩⟨ l ⟩ t ≡ u ∷ A / ⊩A
-  redSubst*Term′ t⇒*u ⊩U@(Uᵣ′ ⁰ 0<1 ⊢Γ) (Uₜ A t⇒*A A-type A≅A ⊩t) =
-    case whrDet:⇒*:Term (typeWhnf A-type) t⇒*A t⇒*u of λ
+  redSubst*Term′ t⇒*u ⊩U@(Uᵣ′ l ≤′-refl D) (Uₜ A t⇒*A A-type A≅A ⊩t) =
+    case whrDet:⇒*:Term (typeWhnf A-type) t⇒*A
+      (convRed:*: t⇒*u (subset* (red D))) of λ
       u⇒*A →
-    case redSubst*′ (univ:*: t⇒*u) ⊩t of λ
-      (⊩u , t≡u) →
+      case redSubst*′ (univ:*: (convRed:*: t⇒*u (subset* (red D)))) ⊩t of λ
+        (⊩u , t≡u) →
       Uₜ A u⇒*A A-type A≅A ⊩u
     , Uₜ₌ A A t⇒*A u⇒*A A-type A-type A≅A ⊩t ⊩u t≡u
+  redSubst*Term′ t⇒*u ⊩U@(Uᵣ′ l (≤′-step l<) D) (Uₜ A t⇒*A A-type A≅A ⊩t) =
+    case redSubst*Term′ t⇒*u (Uᵣ′ l l< D) (Uₜ A t⇒*A A-type A≅A ⊩t) of λ
+      (⊩u , t≡u) → (irrelevanceTerm (Uᵣ′ l l< D) ⊩U ⊩u)
+        , irrelevanceEqTerm (Uᵣ′ l l< D) ⊩U t≡u
   redSubst*Term′ t⇒*u (ℕᵣ A⇒*ℕ) (ℕₜ v t⇒*v v≅v v-ok) =
     case whrDet:⇒*:Term (naturalWhnf (natural v-ok)) t⇒*v
            (convRed:*: t⇒*u (subset* (red A⇒*ℕ))) of λ
@@ -368,5 +377,8 @@ opaque
            (rflₙ , PE.refl) → v-ok
            (ne _ , PE.refl) → v-ok)
       )
-  redSubst*Term′ t⇒*u (emb 0<1 ⊩A) ⊩t =
-    redSubst*Term′ t⇒*u ⊩A ⊩t
+  redSubst*Term′ t⇒*u (emb ≤′-refl ⊩A) ⊩t = redSubst*Term′ t⇒*u ⊩A ⊩t
+  redSubst*Term′ t⇒*u (emb (≤′-step l<) ⊩A) ⊩t =
+    case redSubst*Term′ t⇒*u (emb l< ⊩A) ⊩t of λ where
+      (⊩u , t≡u) → (irrelevanceTerm (emb l< ⊩A) (emb (≤′-step l<) ⊩A) ⊩u)
+        , (irrelevanceEqTerm (emb l< ⊩A) (emb (≤′-step l<) ⊩A) t≡u)

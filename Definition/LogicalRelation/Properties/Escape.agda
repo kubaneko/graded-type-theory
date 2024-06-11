@@ -106,7 +106,7 @@ Id≅Id {⊩A = ⊩A} A≡B =
   open _⊩ₗId_≡_/_ A≡B
 
 escapeEq (Uᵣ′ l′ l< [ ⊢A , ⊢B , D ]) [ ⊢A₁ , ⊢B₁ , D₁ ] =
-  ≅-red D  D₁ Uₙ Uₙ ((≅-Urefl (wf ⊢A)))
+  ≅-red D  D₁ Uₙ Uₙ (≅-univ (≅-Urefl (wf ⊢A)))
 escapeEq (ℕᵣ [ ⊢A , ⊢B , D ]) D′ = ≅-red D D′ ℕₙ ℕₙ (≅-ℕrefl (wf ⊢A))
 escapeEq (Emptyᵣ [ ⊢A , ⊢B , D ]) D′ =
   ≅-red D D′ Emptyₙ Emptyₙ (≅-Emptyrefl (wf ⊢A))
