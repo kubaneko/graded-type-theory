@@ -54,12 +54,6 @@ private
     ⊩Γ : ⊩ᵛ _
 
 opaque
-  m≤n⇒m≤n⊔oT : {l l′ : TypeLevel} → (l″ : TypeLevel) → l ≤ l′ → l ≤ (l′ ⊔T l″)
-  m≤n⇒m≤n⊔oT l l< = ≤⇒≤′ (m≤n⇒m≤n⊔o l (≤′⇒≤ l<))
-
-  m≤n⇒m≤o⊔nT : {l l′ : TypeLevel} → (l″ : TypeLevel) → l ≤ l′ → l ≤ (l″ ⊔T l′)
-  m≤n⇒m≤o⊔nT l l< = ≤⇒≤′ (m≤n⇒m≤o⊔n l (≤′⇒≤ l<))
-
   lem1 : (l′ l : TypeLevel) → (l′ PE.≡ (l′ ⊔T l)) ⊎ (l PE.≡ (l′ ⊔T l))
   lem1 0 l = inj₂ PE.refl
   lem1 (1+ l) 0 = inj₁ PE.refl
@@ -73,6 +67,8 @@ opaque
                 (inj₁ eq) ->  C.cumul≤ _ ( m≤n⇒m≤n⊔oT  l₂ ≤′-refl) (PE.subst (λ x → _ ⊩ᵛ⟨ _ ⟩ U x / _) eq [U₁])  ;
                 (inj₂ eq) ->  C.cumul≤ _ ( m≤n⇒m≤o⊔nT  l₁ ≤′-refl) (PE.subst (λ x → _ ⊩ᵛ⟨ _ ⟩ U x / _) eq [U₂])
            }
+
+
 
 opaque
  unfolding _⊩ᵛ⟨_⟩_ _⊩ᵛ⟨_⟩_≡_ _⊩ᵛ⟨_⟩_∷_ _⊩ᵛ⟨_⟩_≡_∷_

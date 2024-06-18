@@ -1520,6 +1520,19 @@ opaque
     _ , C.cumul _ (≤→< l<) ⊩A
 
 opaque
+  unfolding _⊩ᵛ⟨_⟩_≡_
+
+
+  -- Embedding for _⊩ᵛ⟨_⟩_≡_.
+
+  emb-⊩ᵛ≡ :
+    l ≤ l′ →
+    Γ ⊩ᵛ⟨ l ⟩ A ≡ B →
+    Γ ⊩ᵛ⟨ l′ ⟩ A ≡ B
+  emb-⊩ᵛ≡ l≤l′ A≡B =
+    level-⊩ᵛ≡ (emb-⊩ᵛ l≤l′ (wf-⊩ᵛ≡ A≡B .proj₁)) (emb-⊩ᵛ l≤l′ (wf-⊩ᵛ≡ A≡B .proj₂)) A≡B
+
+opaque
 
   -- Embedding for _⊩ᵛ⟨_⟩_∷_.
 

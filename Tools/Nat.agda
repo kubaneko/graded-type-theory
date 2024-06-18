@@ -25,7 +25,7 @@ open Data.Nat.Properties
          m*n≡0⇒m≡0∨n≡0;
          ⊔-identityʳ; ⊔-assoc; ⊔-comm; ⊔-idem; m≥n⇒m⊔n≡m; m⊔n≡m⇒n≤m;
          m<n⇒m<n⊔o; m<n⇒m<o⊔n; <⇒<′; <′⇒<;  ≤⇒≤′; ≤′⇒≤;
-         m≤n⇒m≤o⊔n; m≤n⇒m≤n⊔o;
+         m≤n⇒m≤o⊔n; m≤n⇒m≤n⊔o;  ≤′-trans;
          ⊓-assoc; ⊓-comm;
          +-distribˡ-⊔; *-distribˡ-+; *-distribˡ-⊔;
          ⊓-distribʳ-⊔; ⊔-distribʳ-⊓; ≤⇒pred≤;

@@ -26,7 +26,8 @@ open import Tools.Empty
 open import Tools.Function
 open import Tools.Level
 open import Tools.Nat using
-  (Nat; 1+; _<′_; ≤′-step; ≤′-refl; _⊔_; _≤′_; <⇒<′; s≤s; ≤′⇒≤; ≤⇒≤′; ≤⇒pred≤)
+  (Nat; 1+; _<′_; ≤′-step; ≤′-refl; _⊔_; _≤′_;
+    <⇒<′; s≤s; ≤′⇒≤; ≤⇒≤′; ≤⇒pred≤; m≤n⇒m≤n⊔o; m≤n⇒m≤o⊔n)
 open import Tools.Product
 import Tools.PropositionalEquality as PE
 open import Tools.Relation
@@ -219,11 +220,24 @@ i ≤ j = i ≤′ j
 
 opaque
   ≤→< : {a b : TypeLevel} → a ≤ b → a < 1+ b
-  ≤→< l< = (<⇒<′ (s≤s (≤′⇒≤ l<)))
+  ≤→< ≤′-refl = ≤′-refl
+  ≤→< (≤′-step l<) = ≤′-step (≤→< l<)
+
+opaque
+  <→≤ : {a b : TypeLevel} → a < b → a ≤ b
+  <→≤ ≤′-refl = ≤′-step ≤′-refl
+  <→≤ (≤′-step l<) = ≤′-step (<→≤ l<)
 
 opaque
   ≤pred≤ : {a b : TypeLevel} → 1+ a ≤ b → a ≤ b
   ≤pred≤ l< = (≤⇒≤′ (≤⇒pred≤ (≤′⇒≤ l<)))
+
+opaque
+  m≤n⇒m≤n⊔oT : {l l′ : TypeLevel} → (l″ : TypeLevel) → l ≤ l′ → l ≤ (l′ ⊔T l″)
+  m≤n⇒m≤n⊔oT l l< = ≤⇒≤′ (m≤n⇒m≤n⊔o l (≤′⇒≤ l<))
+
+  m≤n⇒m≤o⊔nT : {l l′ : TypeLevel} → (l″ : TypeLevel) → l ≤ l′ → l ≤ (l″ ⊔T l′)
+  m≤n⇒m≤o⊔nT l l< = ≤⇒≤′ (m≤n⇒m≤o⊔n l (≤′⇒≤ l<))
 
 -- Reducibility of Neutrals part 2:
 
